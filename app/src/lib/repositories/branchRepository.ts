@@ -1,6 +1,6 @@
-import mongoose, { Document, Model } from 'mongoose';
+import mongoose, { Document, Model, type AnyArray, type ConnectOptions } from 'mongoose';
+import { ensureConnected } from './mongo';
 
-await mongoose.connect('');
 
 
 const branchSchema = new mongoose.Schema({
@@ -13,28 +13,45 @@ const branchSchema = new mongoose.Schema({
     issuanceCardCount: { type: Number, required: true },
   });
 
-  const BranchModel: Model<IBranchModel> = mongoose.model<IBranchModel>('Branch', branchSchema);
+const BranchModel: Model<IBranchModel> = mongoose.model<IBranchModel>('Branch', branchSchema);
+
+const ToModel = (mongoBranch: any): IBranchModel | null => {
+    if(mongoBranch != null)
+    {
+        const { _id, __v, ...rest } = mongoBranch._doc;
+        return { id: _id.toString(), ...rest };
+    }
+    else{
+        return null;
+    }
+  };
+  
 
 
 export class BranchRepository {
     async create(item: IBranchModel): Promise<IBranchModel> {
-       return await BranchModel.create(item);
+       await ensureConnected();
+       return ToModel(await BranchModel.create(item));
     }
   
     async get(id: string): Promise<IBranchModel | null> {
-        return await BranchModel.findById(id);
+       await ensureConnected();
+       return ToModel(await BranchModel.findById(id));
     }
   
     async update(id: string, newItem: IBranchModel): Promise<IBranchModel | null> {
-        return await BranchModel.findByIdAndUpdate(id, newItem, { new: true });
+        await ensureConnected();
+        return ToModel(await BranchModel.findByIdAndUpdate(id, newItem, { new: true }));
     }
   
     async delete(id: string): Promise<void> {
+        await ensureConnected();
         await BranchModel.findByIdAndDelete(id);
     }
         
-  
-    async getAll(): Promise<IBranchModel[]> {
-        return await BranchModel.find();
+    async getAll(offset: number, count: number): Promise<IBranchModel[]> {
+        await ensureConnected();
+        let branches =  await BranchModel.find().skip(offset).limit(count);
+        return branches.map(ToModel);
       }
   }
