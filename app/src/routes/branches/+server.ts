@@ -2,9 +2,10 @@ import { json } from '@sveltejs/kit'
 
 import { Composer, rpc } from '$lib/chord'
 import type { IBranchRPC, IPagingParams } from './types'
-import { BranchRepository } from '$lib/repositories/BranchRepository'
+import { Repository } from '$lib/repositories/Repository'
+import { BranchSchema } from '$lib/repositories/mongoSchemes'
 
-var repo = new BranchRepository()
+var repo = new Repository<IBranchModel>("branch", BranchSchema)
 class BranchRPC implements IBranchRPC {
 
     @rpc()

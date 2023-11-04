@@ -1,4 +1,5 @@
 enum TaskPriority { Low, Medium, High };
+enum EmployeeLevel { Junior, Middle, Senior };
 
 //Условие назначения задачи
 interface appointmentConditions{
@@ -11,5 +12,5 @@ interface ITaskModel{
     priority: TaskPriority,
     executionPeriodMinutes: number,
     conditions: appointmentConditions[],
-    requiredEmployeeLevel: 
+    requiredEmployeeLevel: EmployeeLevel
 }
