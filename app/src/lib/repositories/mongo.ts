@@ -1,5 +1,5 @@
 import { MONGO_CONNECTION_STRING } from '$env/static/private';
-import mongoose, {  Connection, ConnectionStates, type ConnectOptions } from 'mongoose';
+import mongoose, { ConnectionStates, type ConnectOptions } from 'mongoose';
 
 
 
