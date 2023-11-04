@@ -1,5 +1,6 @@
 import mongoose, { Document, Model, type AnyArray, type ConnectOptions } from 'mongoose';
 import { ensureConnected } from './mongo';
+import type { IEntityRepository } from './IEntityRepository';
 
 
 
@@ -27,8 +28,7 @@ const ToModel = (mongoBranch: any): IBranchModel | null => {
   };
   
 
-
-export class BranchRepository {
+export class BranchRepository implements IEntityRepository<IBranchModel> {
     async create(item: IBranchModel): Promise<IBranchModel> {
        await ensureConnected();
        return ToModel(await BranchModel.create(item));

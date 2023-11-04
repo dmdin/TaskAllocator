@@ -2,7 +2,7 @@ import { json } from '@sveltejs/kit'
 
 import { Composer, rpc } from '$lib/chord'
 import type { IBranchRPC, IPagingParams } from './types'
-import { BranchRepository } from '$lib/repositories/branchRepository'
+import { BranchRepository } from '$lib/repositories/BranchRepository'
 
 var repo = new BranchRepository()
 class BranchRPC implements IBranchRPC {
