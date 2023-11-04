@@ -18,10 +18,12 @@ class TestRPC implements ITestRPC {
 const composer = new Composer([TestRPC], { route: '/test' })
 
 export async function POST({ request }) {
+  debugger;
   const body = await request.json()
   return json(await composer.exec(body))
 }
 
 export async function GET() {
+  debugger;
   return json(composer.getSchema())
 }
