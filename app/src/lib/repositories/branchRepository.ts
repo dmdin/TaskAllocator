@@ -29,28 +29,28 @@ const ToModel = (mongoBranch: any): IBranchModel | null => {
 
 
 export class BranchRepository {
+    @ensureConnected
     async create(item: IBranchModel): Promise<IBranchModel> {
-       await ensureConnected();
        return ToModel(await BranchModel.create(item));
     }
   
+    @ensureConnected
     async get(id: string): Promise<IBranchModel | null> {
-       await ensureConnected();
        return ToModel(await BranchModel.findById(id));
     }
   
+    @ensureConnected
     async update(id: string, newItem: IBranchModel): Promise<IBranchModel | null> {
-        await ensureConnected();
         return ToModel(await BranchModel.findByIdAndUpdate(id, newItem, { new: true }));
     }
   
+    @ensureConnected
     async delete(id: string): Promise<void> {
-        await ensureConnected();
         await BranchModel.findByIdAndDelete(id);
     }
-        
+    
+    @ensureConnected
     async getAll(offset: number, count: number): Promise<IBranchModel[]> {
-        await ensureConnected();
         let branches =  await BranchModel.find().skip(offset).limit(count);
         return branches.map(ToModel);
       }
