@@ -1,14 +1,16 @@
-import mongoose, { Document, Model, type AnyArray, type ConnectOptions, Mongoose } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { ensureConnected } from './mongo';
 import type { IEntityRepository } from './IEntityRepository';
+import type { ISpecialistModel } from '$lib/models/ISpecialistModel';
+import type { ITaskModel } from '$lib/models/ITaskModel';
 
 
-type IModel = IBranchModel | ITaskModel
+type IModel = IBranchModel | ISpecialistModel | ITaskModel
 
-const ToModel = (mongoBranch: any): IBranchModel | null => {
-    if(mongoBranch != null)
+const ToModel = (mongoModel: any): IModel | null => {
+    if(mongoModel != null)
     {
-        const { _id, __v, ...rest } = mongoBranch._doc;
+        const { _id, __v, ...rest } = mongoModel._doc;
         return { id: _id.toString(), ...rest };
     }
     else{

@@ -1,16 +1,16 @@
-enum TaskPriority { Low, Medium, High };
-enum EmployeeLevel { Junior, Middle, Senior };
+export enum TaskPriority { Low, Medium, High };
+export enum EmployeeLevel { Junior = 0, Middle = 1, Senior = 2 };
 
 //Условие назначения задачи
-interface appointmentConditions{
+export interface appointmentConditions{
     text: string
 }
 
-interface ITaskModel{
+export interface ITaskModel{
     id: string | undefined,
     name: string,
     priority: TaskPriority,
     executionPeriodMinutes: number,
     conditions: appointmentConditions[],
-    requiredEmployeeLevel: EmployeeLevel
+    level: EmployeeLevel
 }
