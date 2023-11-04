@@ -13,6 +13,25 @@ const branchSchema = new mongoose.Schema({
     issuanceCardCount: { type: Number, required: true },
   });
 
+const TaskSchema = new mongoose.Schema({
+    Name: { type: String, required: true },
+    Priority: { type: Number, required: true },
+    Time_to_accomplish: { type: Number, required: true },
+    Condition_1: { type: String, required: true },
+    Condition_2: { type: String, required: true },
+    Level_of_specialist: { type: [{ id: Number, name: String }], required: true },
+});
+  
+const SpecialistSchema = new mongoose.Schema({
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
+    fatherName: { type: String, required: true },
+    patronymic: { type: String, required: true },
+    Location: { type: String, required: true },
+    coordinates: { type: [Number], required: true },
+    Level_of_specialist: { type: Number, enum: SpecialistLevel, required: true },
+  });
+
 const BranchModel: Model<IBranchModel> = mongoose.model<IBranchModel>('Branch', branchSchema);
 
 const ToModel = (mongoBranch: any): IBranchModel | null => {
@@ -48,7 +67,7 @@ export class BranchRepository {
     async delete(id: string): Promise<void> {
         await BranchModel.findByIdAndDelete(id);
     }
-    
+
     @ensureConnected
     async getAll(offset: number, count: number): Promise<IBranchModel[]> {
         let branches =  await BranchModel.find().skip(offset).limit(count);
