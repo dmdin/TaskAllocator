@@ -1,3 +1,4 @@
+import type { IAddressModel } from "./IAddressModel";
 import type { EmployeeLevel } from "./ITaskModel";
 
 export interface ISpecialistModel {
@@ -5,7 +6,6 @@ export interface ISpecialistModel {
     firstName: string;
     lastName: string;
     fatherName: string;
-    location: string;
-    coordinates: number[];
+    address: IAddressModel,
     level: EmployeeLevel;
   }

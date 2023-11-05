@@ -1,3 +1,5 @@
+import type { IBranchModel } from "$lib/models/IBranchModel"
+
 export interface IPagingParams{
     offset: number,
     count: number

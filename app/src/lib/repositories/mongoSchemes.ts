@@ -1,9 +1,15 @@
-import { EmployeeLevel, TaskPriority } from "$lib/models/ITaskModel";
+import { EmployeeLevel, TaskPriority } from "$lib/models/ITaskModel"; 
 import mongoose from "mongoose";
+
+export const AddressScheme = new mongoose.Schema({
+  latitude: { type: Number, required: true },
+  longitude: { type: Number, required: true },
+  address: { type: String, required: true },
+})
 
 export const BranchSchema = new mongoose.Schema({
     id: { type: mongoose.Schema.ObjectId, required: false},
-    address: { type: String, required: true },
+    address:{ type: AddressScheme, required: true },
     connectionDate: {type: Number, required: true},
     cardMaterialsDelivered: { type: Number, required: true },
     lastCardIssuanceDays: { type: Number, required: true },
@@ -11,13 +17,14 @@ export const BranchSchema = new mongoose.Schema({
     issuanceCardCount: { type: Number, required: true },
   });
 
+ 
+
   export const SpecialistSchema = new mongoose.Schema ({
     id: { type: mongoose.Schema.ObjectId, required: false},
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
     fatherName: { type: String, required: true },
-    location: { type: String, required: true },
-    coordinates: { type: Object, required: true },
+    address:{ type: AddressScheme, required: true },
     level: { type: String, enum: Object.values(EmployeeLevel), required: true },
   });
 
