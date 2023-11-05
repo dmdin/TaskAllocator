@@ -8,6 +8,7 @@ import { Repository } from "./Repository";
 import { ensureConnected } from "./mongo";
 import { BranchSchema, SpecialistSchema, TaskAssignScheme } from "./mongoSchemes";
 import { ToModel } from "./toModel";
+import { SpecialistsRepository } from "./SpecialistRepository";
 
 
 
@@ -19,6 +20,32 @@ export class TaskAssignRepository extends Repository<ITaskAssign> {
         let tasks =  await this.model.find({'specialistId': specialistId, 'status': { $in: this.getAvailableStatuses(onlyActive) }})
         return tasks.map(ToModel<ITaskAssign>);
       }
+
+    @ensureConnected
+    async getBySpecialistEmail(email: string, onlyActive: boolean): Promise<(ITaskAssign | null)[]> {
+        var specialistRepo = new SpecialistsRepository();
+
+        var specialist = await specialistRepo.getByEmail(email);
+
+        let specialistId = specialist?.id ?? "";
+
+        let tasks =  await this.model.find({'specialistId': specialistId.toString(), 'status': { $in: this.getAvailableStatuses(onlyActive) }})
+        return tasks.map(ToModel<ITaskAssign>);
+    }
+
+    @ensureConnected
+    async updateStatus(id: string, status: TaskAssignStatus): Promise<(ITaskAssign | null)>{
+
+        let currentEntity = await this.model.findById(id);
+
+        if(currentEntity != null){
+            currentEntity.status = status;
+            return ToModel<ITaskAssign>(await this.model.findByIdAndUpdate(id, currentEntity, { new: true }));
+        }
+
+        return null;
+      
+    }
 
     async validateTaskAssign(entity: ITaskAssign): Promise<IValidationResult> {
         let result: IValidationResult = {valid: true, message: null}
@@ -38,20 +65,22 @@ export class TaskAssignRepository extends Repository<ITaskAssign> {
             return result;
         }
 
-        if(!isValidObjectId(entity.specialistId)){
-            result.valid = false;
-            result.message = `Невалидный Id специалиста`;
-            return result;
-        }
+        if(entity.specialistId !== undefined && entity.specialistId !== null){
+            if(!isValidObjectId(entity.specialistId)){
+                result.valid = false;
+                result.message = `Невалидный Id специалиста`;
+                return result;
+            }
 
-        let specialistRepo: Repository<ISpecialistModel> = new Repository<ISpecialistModel>("specialists", SpecialistSchema);
+            let specialistRepo: Repository<ISpecialistModel> = new Repository<ISpecialistModel>("specialists", SpecialistSchema);
 
-        let specialist = await specialistRepo.get(entity.specialistId);
-
-        if(specialist == null){
-            result.valid = false;
-            result.message = `Специалиста с id: ${entity.branchId} не существует`;
-            return result;
+            let specialist = await specialistRepo.get(entity.specialistId);
+    
+            if(specialist == null){
+                result.valid = false;
+                result.message = `Специалиста с id: ${entity.branchId} не существует`;
+                return result;
+            }
         }
 
         if(!isValidObjectId(entity.taskId)){
@@ -77,10 +106,10 @@ export class TaskAssignRepository extends Repository<ITaskAssign> {
         let availableTaskStatuses: TaskAssignStatus[];
 
         if(onlyActive){
-            availableTaskStatuses = [TaskAssignStatus.Completed, TaskAssignStatus.InWork, TaskAssignStatus.Todo]
+            availableTaskStatuses = [ TaskAssignStatus.Assigned, TaskAssignStatus.InWork, TaskAssignStatus.Completed]
         }
         else{
-            availableTaskStatuses = [TaskAssignStatus.InWork, TaskAssignStatus.Todo]
+            availableTaskStatuses = [TaskAssignStatus.Created, TaskAssignStatus.Assigned, TaskAssignStatus.InWork, TaskAssignStatus.Completed]
         }
 
         return availableTaskStatuses;
