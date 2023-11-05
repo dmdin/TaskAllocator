@@ -7,8 +7,9 @@ import { SpecialistSchema } from '$lib/repositories/mongoSchemes'
 import type { ISpecialistModel } from '$lib/models/ISpecialistModel'
 import type { IValidationResult } from '$lib/repositories/IValidationResult'
 import type { IResponse } from '$lib/models/IResponse'
+import { SpecialistsRepository } from '$lib/repositories/SpecialistRepository'
 
-var repo = new Repository<ISpecialistModel>("specialists", SpecialistSchema)
+var repo = new SpecialistsRepository()
 class SpecialistRPC implements ISpecialistRPC {
 
     @rpc()
@@ -27,6 +28,11 @@ class SpecialistRPC implements ISpecialistRPC {
     @rpc()
     async getAll(params: IPagingParams): Promise<ISpecialistModel[]>{
         return await repo.getAll(params.offset, params.count)
+    }
+
+    @rpc()
+    async getByEmail(email: String): Promise<ISpecialistModel | null>{
+        return await repo.getByEmail(email)
     }
 
     @rpc()

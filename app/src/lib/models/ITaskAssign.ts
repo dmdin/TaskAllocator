@@ -1,14 +1,14 @@
 import type { TaskPriority } from "./ITaskModel";
 
-export enum TaskAssignStatus { Todo, InWork, Completed };
+export enum TaskAssignStatus { Created, Assigned, InWork, Completed };
 
 export interface ITaskAssign {
     id: string | undefined;
     taskId: string,
-    specialistId: string,
+    specialistId: string | null,
     branchId: string,
-    date: Date,
-    taskNumber: number,
+    date: Date | null,
+    taskNumber: number | null,
     status: TaskAssignStatus,
     priority: TaskPriority
 }

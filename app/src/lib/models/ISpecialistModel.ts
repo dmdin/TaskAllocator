@@ -7,5 +7,6 @@ export interface ISpecialistModel {
     lastName: string;
     fatherName: string;
     address: IAddressModel,
+    email: string,
     level: EmployeeLevel;
   }
