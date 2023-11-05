@@ -3,21 +3,11 @@ import { ensureConnected } from './mongo';
 import type { IEntityRepository } from './IEntityRepository';
 import type { ISpecialistModel } from '$lib/models/ISpecialistModel';
 import type { ITaskModel } from '$lib/models/ITaskModel';
+import type { IBranchModel } from '$lib/models/IBranchModel';
+import type { ITaskAssign } from '$lib/models/ITaskAssign';
+import type { IModel } from './IModel';
+import { ToModel } from './toModel';
 
-
-type IModel = IBranchModel | ISpecialistModel | ITaskModel
-
-const ToModel = (mongoModel: any): IModel | null => {
-    if(mongoModel != null)
-    {
-        const { _id, __v, ...rest } = mongoModel._doc;
-        return { id: _id.toString(), ...rest };
-    }
-    else{
-        return null;
-    }
-  };
-  
 
 export class Repository<T extends IModel> implements IEntityRepository<T> {
 
@@ -29,17 +19,17 @@ export class Repository<T extends IModel> implements IEntityRepository<T> {
 
     @ensureConnected
     async create(item: T): Promise<T> {
-       return ToModel(await this.model.create(item));
+       return ToModel<T>(await this.model.create(item)) as T;
     }
   
     @ensureConnected
     async get(id: string): Promise<T | null> {
-       return ToModel(await this.model.findById(id));
+       return ToModel<T>(await this.model.findById(id));
     }
   
     @ensureConnected
     async update(id: string, newItem: T): Promise<T | null> {
-        return ToModel(await this.model.findByIdAndUpdate(id, newItem, { new: true }));
+        return ToModel<T>(await this.model.findByIdAndUpdate(id, newItem, { new: true }));
     }
   
     @ensureConnected
@@ -50,6 +40,6 @@ export class Repository<T extends IModel> implements IEntityRepository<T> {
     @ensureConnected
     async getAll(offset: number, count: number): Promise<T[]> {
         let branches =  await this.model.find().skip(offset).limit(count);
-        return branches.map(ToModel);
+        return branches.map(x => ToModel<T>(x) as T);
       }
   }

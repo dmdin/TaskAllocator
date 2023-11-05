@@ -1,3 +1,4 @@
+import { TaskAssignStatus } from "$lib/models/ITaskAssign";
 import { EmployeeLevel, TaskPriority } from "$lib/models/ITaskModel"; 
 import mongoose from "mongoose";
 
@@ -28,11 +29,22 @@ export const BranchSchema = new mongoose.Schema({
     level: { type: String, enum: Object.values(EmployeeLevel), required: true },
   });
 
-  export const TaskSchema = new mongoose.Schema({
+  export const TaskScheme = new mongoose.Schema({
     id: { type: mongoose.Schema.ObjectId, required: false},
     name: { type: String, required: true },
     priority: { type: String, enum: Object.values(TaskPriority), required: true },
     executionPeriodMinutes: { type: Number, required: true },
     conditions: { type: Object, required: true },
     level: { type: String, enum: Object.values(EmployeeLevel), required: true },
-});
+  });
+
+  export const TaskAssignScheme = new mongoose.Schema({
+    id: { type: mongoose.Schema.ObjectId, required: false},
+    taskId:  { type: String, required: true },
+    specialistId:  { type: String, required: true },
+    branchId:  { type: String, required: true },
+    date:  { type: Date, required: true },
+    taskNumber:  { type: Number, required: true },
+    status: { type: String, enum: Object.values(TaskAssignStatus), required: true },
+    priority: { type: String, enum: Object.values(TaskPriority), required: true },
+  });

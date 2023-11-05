@@ -5,13 +5,18 @@ import type { ISpecialistRPC, IPagingParams } from './types'
 import { Repository } from '$lib/repositories/Repository'
 import { SpecialistSchema } from '$lib/repositories/mongoSchemes'
 import type { ISpecialistModel } from '$lib/models/ISpecialistModel'
+import type { IValidationResult } from '$lib/repositories/IValidationResult'
+import type { IResponse } from '$lib/models/IResponse'
 
 var repo = new Repository<ISpecialistModel>("specialists", SpecialistSchema)
 class SpecialistRPC implements ISpecialistRPC {
 
     @rpc()
-    async create(specialist: ISpecialistModel): Promise<ISpecialistModel> {
-        return await repo.create(specialist)
+    async create(specialist: ISpecialistModel): Promise<IResponse<ISpecialistModel>> {
+        return {
+            validation: {valid: true} as IValidationResult,
+            entity: await repo.create(specialist)
+        };
     }
 
     @rpc()
@@ -26,9 +31,15 @@ class SpecialistRPC implements ISpecialistRPC {
 
     @rpc()
     async update(specialist: ISpecialistModel): Promise<ISpecialistModel | null>{
-        let result: ISpecialistModel | null = null;
+        let result: IResponse<ISpecialistModel> = {validation: {valid: true} as IValidationResult, entity: null}
+
         if(specialist.id != null){
-            result = await repo.update(specialist.id, specialist)
+            result.entity = await repo.update(specialist.id, specialist)
+
+            if(result.entity == null){
+                result.validation.valid = false;
+                result.validation.message = `Сущность с Id: ${specialist.id} не найдена`
+            }
         }
         
         return result;

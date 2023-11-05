@@ -1,9 +1,5 @@
 import type { IBranchModel } from "$lib/models/IBranchModel"
-
-export interface IPagingParams{
-    offset: number,
-    count: number
-}
+import type { IPagingParams } from "$lib/models/IPagingParams"
 
 export interface IBranchRPC {
     createBranch(branch: IBranchModel): Promise<string>
