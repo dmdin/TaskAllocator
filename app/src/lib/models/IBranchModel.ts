@@ -3,6 +3,7 @@ import type { IAddressModel } from "./IAddressModel";
 enum ConnectionDate { Yesterday, LongAgo };
 
 
+
 export interface IBranchModel {
     id: string | undefined;
     address: IAddressModel,
