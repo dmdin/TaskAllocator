@@ -1,8 +1,8 @@
+@import 'global.postcss';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import 'global.postcss';
 
 
 $dark-300: hsl(213, 24%, 7%);
@@ -52,6 +52,9 @@ main {
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 	padding: 32px;
 }
+.btn {
+	@apply font-normal normal-case
+}
 /*
 .btn {
 	color: $dark-300;
@@ -95,7 +98,7 @@ main {
 	}
 }
 
-input {
+/* input {
 	background-color: $dark-100;
 	border: $gray 2px solid;
 	border-radius: 5px;
@@ -106,38 +109,5 @@ input {
 	&:focus {
 		outline: $primary-300 2px solid;
 	}
-}
+} */
 
-.auth-form {
-	display: flex;
-	flex-direction: column;
-	width: 100%;
-	max-width: 400px;
-	min-width: 400px;
-	margin: 0 auto;
-
-	& button {
-		margin-bottom: 10px;
-	}
-
-	& label {
-		text-align: left;
-		padding-bottom: 2px;
-		font-size: 16px;
-	}
-}
-
-.socials {
-	width: 100%;
-	max-width: 400px;
-	min-width: 400px;
-	margin: 0 auto;
-	display: flex;
-	align-items: center;
-	gap: 1rem;
-	padding-top: 10px;
-
-	& .btn {
-		width: 100%;
-	}
-}

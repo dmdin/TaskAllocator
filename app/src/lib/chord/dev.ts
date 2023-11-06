@@ -4,18 +4,18 @@ import axios from 'axios';
 interface MethodDescription {
   key: string;
   descriptor: PropertyDescriptor;
-  target: {name: string};
-  metadata: {
-    returnType: unknown;
-    argsType: unknown[];
-  }
+  target: Target;
+  metadata: MethodMetadata;
 }
 
-export type MethodSchema = Record<string, { argsType: string[], returnType: string }>
+export interface MethodMetadata {
+  returnType: unknown;
+  argsType: unknown[];
+}
 
 export interface Schema {
   route: string
-  methods: MethodSchema | Record<string, MethodSchema>
+  methods: Record<string, MethodMetadata>
 }
 
 export interface Call {
@@ -27,6 +27,10 @@ export interface ComposerConfig {
   route?: string,
 }
 
+export interface Target {
+  constructor: { name: string }
+}
+
 export type ComposerModels = unknown[] | Record<string, unknown>
 // TODO think to make constructor instead
 export class Composer {
@@ -35,15 +39,15 @@ export class Composer {
 
   constructor(models: ComposerModels, config?: ComposerConfig) {
     this.config = config;
-    // if (Array.isArray(models)) {
-
-    // }
+    // List is unwrapped client and Records<string, Target> are wrapped
     this.models = models;
+
   }
+
   static methods = new Map<string, MethodDescription>();
 
-  static methodKey(target: {name: string}, key: string) {
-    return `${target.name}/${key}`
+  static methodKey(target: Target, key: string) {
+    return `${target.constructor.name}/${key}`
   }
 
   static add({ key, descriptor, metadata, target }: MethodDescription) {
@@ -51,29 +55,26 @@ export class Composer {
     Composer.methods.set(key, { key, descriptor, metadata, target });
   }
 
+
   getSchema(route?: string): Schema {
     route = route || this.config?.route as string;
     if (!route) {
       throw new EvalError("No route provided during Composer initialization or Schema generation")
     }
-    const methods = {}
-
+    const methods: Record<string, MethodMetadata> = {}
 
     for (const [key, info] of Composer.methods.entries()) {
       const { argsType, returnType } = info.metadata
-      const className = info.target.name
-
-      if (this.config?.wrapped) {
-        methods[className][key] = { argsType: argsType.map(a => a.name), returnType }
-      } else {
-        methods[key] = { argsType: argsType.map(a => a.name), returnType }
-      }
+      methods[key] = { argsType, returnType } as MethodMetadata
     }
     return { methods, route }
   }
 
   async exec({ method, args }: Call) {
-    const { target, descriptor } = Composer.methods.get(method)
+    const methodDesc = Composer.methods.get(method)
+    if (!method) throw new EvalError(`Cannot find method: ${method}`)
+
+    const { target, descriptor } = methodDesc as MethodDescription
     return await descriptor.value.apply(target, [args])
   }
 }
@@ -81,12 +82,12 @@ export class Composer {
 
 
 export function rpc() {
-  return function (target: unknown, key: string, descriptor: PropertyDescriptor) {
+  return function (target: Target, key: string, descriptor: PropertyDescriptor) {
     // console.log(key, key, descriptor)
     // console.log('Metadata', Reflect.getMetadataKeys(target))
     // console.log("design:paramtypes", Reflect.getMetadata("design:paramtypes", target, key));
     // console.log("design:type", Reflect.getMetadata("design:type", target, key));
-
+    // console.log('add', )
     // TODO return type doesn`t work
     // console.log(target.constructor.name)
     // console.log("design:returntype", Reflect.getMetadata("design:returntype", target, key));

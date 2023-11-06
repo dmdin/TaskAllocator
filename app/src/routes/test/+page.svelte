@@ -5,9 +5,9 @@
   import type {ITestRPC} from './types'
 
   onMount(async () => {
-    const schema = await axios.get('/test').then(r => r.data)
-    const client = initClient<ITestRPC>(schema)
-    console.log(await client.dbReq(123))
+    const schema = await axios.get(window.location.href).then(r => r.data)
+    const rpc = initClient<ITestRPC>(schema)
+    console.log(await rpc.dbReq(123))
   })
 
 </script>
