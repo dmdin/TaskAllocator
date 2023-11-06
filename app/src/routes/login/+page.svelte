@@ -28,7 +28,7 @@
 	};
 </script>
 
-<main class="flex flex-col items-center">
+<main class="flex flex-col items-center justify-center h-full">
 	<h1>Login</h1>
 	<form action="?/login" method="POST" class="auth-form">
 		<label class="label" for=""> Email </label>
@@ -64,25 +64,11 @@
 		max-width: 400px;
 		min-width: 400px;
 		margin: 0 auto;
-
-		& button {
-			margin-bottom: 10px;
-		}
-
-		& label {
-			text-align: left;
-			padding-bottom: 2px;
-			font-size: 16px;
-		}
 	}
 
 	.socials {
 		width: 100%;
 		max-width: 400px;
 		min-width: 400px;
-
-		& .btn {
-			width: 100%;
-		}
 	}
 </style>

@@ -4,8 +4,7 @@
 @tailwind components;
 @tailwind utilities;
 
-
-$dark-300: hsl(213, 24%, 7%);
+/* $dark-300: hsl(213, 24%, 7%);
 $dark-200: hsl(222, 15%, 13%);
 $dark-100: hsl(222, 15%, 19%);
 $primary-300: hsl(149, 77%, 46%);
@@ -14,36 +13,26 @@ $primary-100: hsl(149, 77%, 66%);
 $secondary-300: hsl(289, 90%, 53%);
 $secondary-200: hsl(289, 90%, 63%);
 $secondary-100: hsl(289, 90%, 73%);
-$gray: hsl(212, 15%, 48%);
+$gray: hsl(212, 15%, 48%); */
 
 body {
-	background: $dark-200;
-	color: #ffffff;
-	font-size: 18px;
 }
 
-main {
-	padding: 2rem;
-	text-align: center;
+
+.btn {
+	@apply font-normal normal-case;
 }
 
-.container {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	height: 100vh;
-	padding: 0 20px;
-}
-
+/* 
 .auth-buttons {
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	margin-top: 1rem;
 	gap: 1rem;
-}
+} */
 
-.card {
+/* .card {
 	display: flex;
 	flex-direction: column;
 	margin: 0 auto;
@@ -52,9 +41,7 @@ main {
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 	padding: 32px;
 }
-.btn {
-	@apply font-normal normal-case
-}
+*/
 /*
 .btn {
 	color: $dark-300;
@@ -79,16 +66,16 @@ main {
 	}
 }
 */
-.btn-secondary {
+/* .btn-secondary {
 	background-color: $secondary-200;
 	color: $dark-300;
 
 	&:hover {
 		background-color: $secondary-300;
 	}
-}
+} */
 
-.btn-ghost {
+/* .btn-ghost {
 	background-color: transparent;
 	border: 2px solid $gray;
 
@@ -96,7 +83,7 @@ main {
 		background-color: $dark-100;
 		color: #ffffff;
 	}
-}
+} */
 
 /* input {
 	background-color: $dark-100;
@@ -110,4 +97,3 @@ main {
 		outline: $primary-300 2px solid;
 	}
 } */
-
