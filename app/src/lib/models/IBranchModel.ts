@@ -1,15 +1,16 @@
-import type { IAddressModel } from "./IAddressModel";
+import type { IAddressModel } from './IAddressModel';
 
-enum ConnectionDate { Yesterday, LongAgo };
-
-
+enum ConnectionDate {
+  Yesterday,
+  LongAgo
+}
 
 export interface IBranchModel {
-    id: string | undefined;
-    address: IAddressModel,
-    connectionDate: ConnectionDate,
-    cardMaterialsDelivered: boolean,
-    lastCardIssuanceDays: number,
-    approvedIssuesNumber: number,
-    issuanceCardCount: number
+  id: string | undefined;
+  address: IAddressModel;
+  connectionDate: ConnectionDate;
+  cardMaterialsDelivered: boolean;
+  lastCardIssuanceDays: number;
+  approvedIssuesNumber: number;
+  issuanceCardCount: number;
 }

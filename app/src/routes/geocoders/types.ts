@@ -1,7 +1,5 @@
-import type { IAddressModel } from "$lib/models/IAddressModel"
+import type { IAddressModel } from '$lib/models/IAddressModel';
 
 export interface IGeocoderRPC {
-    getCoords(address: string): Promise<IAddressModel | null>
-  }
-
-  
+  getCoords(address: string): Promise<IAddressModel | null>;
+}

@@ -1,4 +1,4 @@
-export interface IPagingParams{
-    offset: number,
-    count: number
+export interface IPagingParams {
+  offset: number;
+  count: number;
 }

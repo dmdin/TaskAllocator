@@ -1,4 +1,4 @@
-interface IFindAssignedTaskByEmail{
-    email: string,
-    onlyActive: boolean
+interface IFindAssignedTaskByEmail {
+  email: string;
+  onlyActive: boolean;
 }

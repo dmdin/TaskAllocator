@@ -11,23 +11,22 @@ export interface MethodMetadata {
 }
 
 export interface Schema {
-  route: string
-  methods: Record<string, MethodMetadata>
-  models: string[]
+  route: string;
+  methods: Record<string, MethodMetadata>;
+  models: string[];
 }
 
 export interface Call {
   method: string;
-  args: unknown[]
+  args: unknown[];
 }
 
 export interface ComposerConfig {
-  route?: string,
+  route?: string;
 }
 
 export interface Target {
-  constructor: { name: string }
+  constructor: { name: string };
 }
 
-export type ComposerModels = unknown[] | Record<string, unknown>
-
+export type ComposerModels = unknown[] | Record<string, unknown>;

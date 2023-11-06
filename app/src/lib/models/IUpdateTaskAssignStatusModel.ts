@@ -1,6 +1,6 @@
-import type { TaskAssignStatus } from "./ITaskAssign";
+import type { TaskAssignStatus } from './ITaskAssign';
 
-export interface IUpdateTaskAssignStatusModel{
-    id: string,
-    newStatus: TaskAssignStatus
+export interface IUpdateTaskAssignStatusModel {
+  id: string;
+  newStatus: TaskAssignStatus;
 }
