@@ -1,6 +1,9 @@
+import type { RequestEvent } from '../$types'
 
-function middleware(event){
-  
+async function sveltekitMiddleware(event: RequestEvent, ctx: Record<string, unknown>, next: CallableFunction) {
+  ctx.request = event?.request
+  Object.assign(ctx, event.locals)
+  next()
 }
 
-export default middleware
+export default () => sveltekitMiddleware

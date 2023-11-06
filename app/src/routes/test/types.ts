@@ -5,7 +5,7 @@ export interface ITestRPC {
 
 export interface ITestRPC2 {
   dbReq(param: number): string
-  dbReq3(param: string): string
+  dbReq3(param: string, param2: number): string
 }
 
 export type Wrapped = {TestRPC: ITestRPC, TestRPC2: ITestRPC2}

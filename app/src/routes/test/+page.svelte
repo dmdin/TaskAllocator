@@ -4,14 +4,17 @@
   import {onMount} from 'svelte'
   import type {Wrapped, Unwrapped} from './types'
 
+  export let data;
+  const {schema} = data;
+
   onMount(async () => {
-    const schema = await axios.get(window.location.href).then(r => r.data)
     const rpc = initClient<Unwrapped>(schema)
     // console.log(await rpc.TestRPC.dbReq(123))
     // console.log(await rpc.TestRPC2.dbReq3('dbreq3'))
   //   console.log(await rpc.dbReq(123))
   //   console.log(await rpc.dbReq2('world'))
-  //   console.log(await rpc.dbReq3('third'))
+    console.log(await rpc.dbReq3('third', 123))
+    console.log(await rpc.dbReq(123))
   })
 
 </script>
