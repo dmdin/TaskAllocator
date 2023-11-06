@@ -8,6 +8,7 @@ import { TaskAssignScheme } from '$lib/repositories/mongoSchemes'
 import { TaskAssignRepository } from '$lib/repositories/TaskAssignRepository'
 import type { IValidationResult } from '$lib/repositories/IValidationResult'
 import type { IResponse } from '$lib/models/IResponse'
+import type { IUpdateTaskAssignStatusModel } from '$lib/models/IUpdateTaskAssignStatusModel'
 
 var taskAssignRepo = new TaskAssignRepository("task-assign", TaskAssignScheme)
 class TaskAssignRPC implements ITaskAssignRPC {
@@ -35,9 +36,18 @@ class TaskAssignRPC implements ITaskAssignRPC {
     }
 
     @rpc()
-    async getForSpecialit(specialitsId: string, onlyActive: boolean): Promise<(ITaskAssign | null)[]>{
+    async getForSpecialist(specialitsId: string, onlyActive: boolean): Promise<(ITaskAssign | null)[]>{
+        return await taskAssignRepo.getForSpecialist(specialitsId, onlyActive);
+    }
 
-        return await taskAssignRepo.getForSpecialist(specialitsId, onlyActive)
+    @rpc()
+    async updateStatus(param: IUpdateTaskAssignStatusModel): Promise<(ITaskAssign | null)>{
+        return await taskAssignRepo.updateStatus(param.id, param.newStatus);
+    }
+
+    @rpc()
+    async getBySpecialistEmail(params: IFindAssignedTaskByEmail): Promise<(ITaskAssign | null)[]>{
+        return await taskAssignRepo.getBySpecialistEmail(params.email, params.onlyActive);
     }
 
     @rpc()

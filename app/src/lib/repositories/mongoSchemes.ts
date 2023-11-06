@@ -25,6 +25,7 @@ export const BranchSchema = new mongoose.Schema({
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
     fatherName: { type: String, required: true },
+    email: {type: String, required: true},
     address:{ type: AddressScheme, required: true },
     level: { type: String, enum: Object.values(EmployeeLevel), required: true },
   });
@@ -41,10 +42,10 @@ export const BranchSchema = new mongoose.Schema({
   export const TaskAssignScheme = new mongoose.Schema({
     id: { type: mongoose.Schema.ObjectId, required: false},
     taskId:  { type: String, required: true },
-    specialistId:  { type: String, required: true },
+    specialistId:  { type: String, required: false },
     branchId:  { type: String, required: true },
-    date:  { type: Date, required: true },
-    taskNumber:  { type: Number, required: true },
+    date:  { type: Date, required: false },
+    taskNumber:  { type: Number, required: false },
     status: { type: String, enum: Object.values(TaskAssignStatus), required: true },
     priority: { type: String, enum: Object.values(TaskPriority), required: true },
   });
