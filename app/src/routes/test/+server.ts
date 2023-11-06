@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit'
 import type { RequestEvent } from '../$types'
-import { Composer, rpc } from '$lib/chord/dev'
+import { Composer, rpc } from '$lib/chord'
 import sveltekit from '$lib/chord/middlewares/sveltekit'
 import type { ITestRPC, ITestRPC2 } from './types'
 
@@ -24,7 +24,7 @@ class TestRPC2 implements ITestRPC2 {
   }
   @rpc()
   dbReq3(param: string, param2: number, ctx?: unknown): string {
-    console.log('ctx', ctx.sb.supabaseUrl)
+    console.log('ctx', ctx.session.user.email)
     return `Hello from TestRPC2 dbReq3, ${param} ${param2}!`
   }
 }

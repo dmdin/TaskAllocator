@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {initClient} from '$lib/chord/dev'
+  import {initClient} from '$lib/chord'
   import axios from 'axios'
   import {onMount} from 'svelte'
   import type {Wrapped, Unwrapped} from './types'
@@ -18,6 +18,3 @@
   })
 
 </script>
-
-<h1 class="text-sm text-primary">Test Endpoint</h1>
-<button class="btn btn-primary">Hello</button>
