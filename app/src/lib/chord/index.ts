@@ -4,16 +4,18 @@ import axios from 'axios';
 interface MethodDescription {
   key: string;
   descriptor: PropertyDescriptor;
-  target: unknown;
+  target: {name: string};
   metadata: {
     returnType: unknown;
     argsType: unknown[];
   }
 }
 
+export type MethodSchema = Record<string, { argsType: string[], returnType: string }>
+
 export interface Schema {
   route: string
-  methods: Record<string, { argsType: string[], returnType: string }>
+  methods: MethodSchema | Record<string, MethodSchema>
 }
 
 export interface Call {
@@ -23,21 +25,29 @@ export interface Call {
 
 export interface ComposerConfig {
   route?: string,
-  wrapped?: boolean
 }
 
+export type ComposerModels = unknown[] | Record<string, unknown>
 // TODO think to make constructor instead
 export class Composer {
   config?: ComposerConfig
-  models: unknown[]
+  models: ComposerModels
 
-  constructor([...models], config?: ComposerConfig) {
-    this.config = config 
+  constructor(models: ComposerModels, config?: ComposerConfig) {
+    this.config = config;
+    // if (Array.isArray(models)) {
+
+    // }
     this.models = models;
   }
   static methods = new Map<string, MethodDescription>();
 
+  static methodKey(target: {name: string}, key: string) {
+    return `${target.name}/${key}`
+  }
+
   static add({ key, descriptor, metadata, target }: MethodDescription) {
+    key = Composer.methodKey(target, key)
     Composer.methods.set(key, { key, descriptor, metadata, target });
   }
 
@@ -47,9 +57,17 @@ export class Composer {
       throw new EvalError("No route provided during Composer initialization or Schema generation")
     }
     const methods = {}
+
+
     for (const [key, info] of Composer.methods.entries()) {
       const { argsType, returnType } = info.metadata
-      methods[key] = { argsType: argsType.map(a => a.name), returnType }
+      const className = info.target.name
+
+      if (this.config?.wrapped) {
+        methods[className][key] = { argsType: argsType.map(a => a.name), returnType }
+      } else {
+        methods[key] = { argsType: argsType.map(a => a.name), returnType }
+      }
     }
     return { methods, route }
   }

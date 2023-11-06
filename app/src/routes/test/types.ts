@@ -5,6 +5,8 @@ export interface ITestRPC {
 
 export interface ITestRPC2 {
   dbReq(param: number): string
+  dbReq3(param: string): string
 }
 
-export type Composed = {ITestRPC: ITestRPC, ITestRPC2: ITestRPC2}
+export type Wrapped = {TestRPC: ITestRPC, TestRPC2: ITestRPC2}
+export interface Unwrapped extends ITestRPC, ITestRPC2 {}
