@@ -1,13 +1,15 @@
 <script lang="ts">
-  import { initClient } from '$lib/chord';
+  import { initClient } from '$lib/chord/dev';
   import axios from 'axios';
   import { onMount } from 'svelte';
   import type { Wrapped, Unwrapped } from './types';
 
+  export let data;
+  const { schema } = data;
   onMount(async () => {
-    const schema = await axios.get('/test').then((r) => r.data);
-    const client = initClient<Unwrapped>(schema);
-    console.log(await client.dbReq(123));
+    const client = initClient<Wrapped>(schema);
+    console.log('TestRPC2', await client.TestRPC2.dbReq(123));
+    console.log('TestRPC', await client.TestRPC.dbReq(123));
   });
 </script>
 
