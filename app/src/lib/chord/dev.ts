@@ -4,10 +4,13 @@ import type {
   ComposerConfig,
   ComposerModels,
   MethodDescription,
+  PropertyDescription,
   Target,
   Schema,
   MethodMetadata,
-  Call
+  Call,
+  PropKey,
+  ClassConstructor,
 } from './types';
 
 import axios from 'axios';
@@ -26,20 +29,24 @@ export class Composer {
     this.middlewares = [];
   }
 
+  // We need mapping <ClassName>/<MethodName> to avoid overlapping of methods with the same name
   static methods = new Map<string, MethodDescription>();
 
-  static methodKey(target: Target, key: string) {
-    return `${target.constructor.name}/${key}`;
-  }
+  // We need to use name of class as key to optimize dependency search in case of large amount of DI
+  static props = new Map<string, PropertyDescription[]>();
 
-  static add({ key, descriptor, metadata, target }: MethodDescription) {
-    key = Composer.methodKey(target, key);
+  static addMethod({ key, descriptor, metadata, target }: MethodDescription) {
+    key = `${target.constructor.name}/${key}`;
     Composer.methods.set(key, { key, descriptor, metadata, target });
   }
 
-  static findRequest(event: unknown) {
-    // console.log(event)
+  static addProp({ key, target }) {
+    const targetName = `${target.constructor.name}`
+    const oldProps = Composer.props.get(targetName) ?? []
+    Composer.props.set(targetName, oldProps.concat({ key, target }))
+  }
 
+  static findRequest(event: unknown) {
     if (event?.body && event.method) {
       return event;
     }
@@ -47,6 +54,10 @@ export class Composer {
     const fields = Object.getOwnPropertyNames(event);
     if (fields.includes('request')) return (event as { request: Request })['request'];
   }
+
+  // static resolve(injectable: object, key: PropKey) {
+  // 
+  // }
 
   use(middleware: CallableFunction) {
     this.middlewares.push(middleware);
@@ -110,13 +121,24 @@ export class Composer {
     if (!method) throw new EvalError(`Cannot find method: ${method}`);
 
     const { target, descriptor } = methodDesc as MethodDescription;
-    // console.log(method, args)
+
+    // Inject ctx dependency
+    const ctxProp = Composer.props.get(target.constructor.name)?.find(d => d.key === 'ctx')
+    if (ctxProp) {
+      Reflect.defineProperty(target, ctxProp.key, {
+        configurable: false,
+        enumerable: false,
+        get() {
+          return ctx
+        }
+      })
+    }
     return await descriptor.value.apply(target, args.concat(ctx));
   }
 }
 
 export function rpc() {
-  return function (target: Target, key: string, descriptor: PropertyDescriptor) {
+  return function (target: Target, key: PropKey, descriptor: PropertyDescriptor) {
     // console.log(key, key, descriptor)
     // console.log('Metadata', Reflect.getMetadataKeys(target))
     // console.log("design:paramtypes", Reflect.getMetadata("design:paramtypes", target, key).map(v => v.name));
@@ -130,55 +152,55 @@ export function rpc() {
       argsType: Reflect.getMetadata('design:paramtypes', target, key)?.map((a) => a?.name),
       returnType: Reflect.getMetadata('design:returntype', target, key)
     };
-    Composer.add({ key, descriptor, metadata, target });
+    Composer.addMethod({ key, descriptor, metadata, target });
   };
+}
+
+export function depends() {
+  return function (target: object, key: PropKey) {
+    // const injectable = Reflect.getMetadata("design:type", target, key) as ClassConstructor<object>;
+    Composer.addProp({
+      key, target
+    })
+
+    // If dependency is context, inject it during exec call
+    if (key === 'ctx') return
+
+    Reflect.defineProperty(target, key, {
+      configurable: false,
+      enumerable: false,
+      get() {
+        return "hello world"
+      }
+    })
+  }
 }
 
 export function initClient<T>(schema: Schema): T {
   function call(method: string) {
-    async function intercept(...args: unknown[]) {
+    return async (...args: unknown[]) => {
       return (await axios.post(schema.route, { args, method } as Call)).data;
     }
-    return intercept;
   }
 
-  const handler: Record<string, string | ((args: unknown) => Promise<any>)> = {};
+  const handler: Record<string, string | ((args: unknown[]) => Promise<any>)> = {};
 
   for (const model of schema.models) {
-    const modelMethods = Object.entries(schema.methods).filter(([k, v]) => k.startsWith(model));
-
+    const modelMethods = Object.entries(schema.methods).filter(([k, v]) => k.split('/')[0] === model);
     const renamed = Object.fromEntries(
       // Remove Model name from key and place callable
       modelMethods.map(([k, v]) => {
         const methodName = k.split('/')[1];
         const callable = call(k);
+        console.log(methodName, k)
         // Allow unwrapped calls
         handler[methodName] = callable;
         return [methodName, callable];
       })
     );
+    console.log(renamed)
     handler[model] = renamed;
   }
-  return handler;
+  console.log(handler)
+  return handler as T;
 }
-
-// const example = Injector.resolve();
-// export function loggedMethod(target: any, memberName: string, propertyDescriptor: PropertyDescriptor) {
-//   function replacementMethod(this: any, ...args: any[]) {
-//     console.log(`LOG: Entering method '${memberName}'.`)
-//     const result = propertyDescriptor.value.call(this, ...args);
-//     console.log(`LOG: Exiting method '${memberName}'.`)
-//     return result;
-//   }
-//   return {
-//     get() {
-//       Object.defineProperty(this, memberName, {
-//         value: replacementMethod,
-//         configurable: true,
-//         writable: true
-//       });
-//       return replacementMethod;
-
-//     }
-//   }
-// }
