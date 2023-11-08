@@ -1,10 +1,6 @@
 import mongoose, { Model } from 'mongoose';
 import { ensureConnected } from './mongo';
 import type { IEntityRepository } from './IEntityRepository';
-import type { ISpecialistModel } from '$lib/models/ISpecialistModel';
-import type { ITaskModel } from '$lib/models/ITaskModel';
-import type { IBranchModel } from '$lib/models/IBranchModel';
-import type { ITaskAssign } from '$lib/models/ITaskAssign';
 import type { IModel } from './IModel';
 import { ToModel } from './toModel';
 
