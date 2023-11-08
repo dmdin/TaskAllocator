@@ -8,8 +8,8 @@
 </script>
 
 <!-- {#if show} -->
-<dialog {id} class="modal modal-bottom sm:modal-middle">
-  <div class="modal-box">
+<dialog {id} class="modal modal-bottom sm:modal-middle ">
+  <div class="modal-box border border-primary">
     <h3 class="font-bold text-lg">{title}</h3>
     <slot/>
   </div>
