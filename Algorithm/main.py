@@ -6,6 +6,8 @@ from typing import List
 from models.TaskPriority import TaskPriority
 from bson.objectid import ObjectId
 from models.AssignTask import TaskAssignStatus
+import pandas as pd
+from get_time import MatrixWithMinutes
 
 repo = MongoRepository()
 
@@ -49,7 +51,20 @@ def is_task_exists(tasksToDo: List[AssignTask], taskToCheck: AssignTask):
     
     return False
 
+def get_sub_workers(point_id, workers_df, time_df, grade, ttime):
+    sub_workers = workers_df[(workers_df.grade==grade) & (workers_df.work_time >= ttime*60)]
+    if len(sub_workers) == 0:
+        return sub_workers
+    sub_workers["time_to"] = sub_workers.base_id.apply(lambda x: time_df[(time_df.id1 == x) & (time_df.id2 == point_id)]["t"].values[0])
+    sub_workers = sub_workers.sort_values(by="time_to")
+    sub_workers["diff_time"] = sub_workers["work_time"] - sub_workers["time_to"] - ttime * 60
+    sub_workers = sub_workers[sub_workers.diff_time >= 0]
+    return sub_workers
+
 def job():
+
+    WORK_HOURS_PER_DAY = 8
+    MINUTES_IN_HOUR = 60
 
     #Доставка карт и материалов
     task1Id = '654aa25628fd5a4d65e9e583'
@@ -63,8 +78,12 @@ def job():
     repo = MongoRepository()
     branches = repo.getAllBranches()
     tasksToDo = repo.getAllActiveAssignedTasks()
+    workers = repo.getAllSpecialists()
 
+    workers_df = pd.DataFrame([{'worker_id':t.id, 'base_id':'654aa119bff6a11489a51102', 'grade': int(t.level.value)+1} for t in workers])
+    workers_df["work_time"] = [WORK_HOURS_PER_DAY * MINUTES_IN_HOUR] * workers_df.shape[0]
     
+
     for branch in branches:
 
         assignedTask = AssignTask()
@@ -91,6 +110,88 @@ def job():
 
     for i in tasksToDo:
         i.specialistId = None
+
+
+    tasks_df = pd.DataFrame([{'id': t.id, 'point_id':t.branchId, 'prior': int(t.priority.value), 'task': t.taskId, 'dates': t.date} for t in tasksToDo])
+
+    workers_task = {}
+
+    matr = MatrixWithMinutes()
+
+    time_df  = []
+
+    for loc in matr.matrix:
+        for loc2 in matr.matrix[loc]:
+            time_df.append({'id1': loc, 'id2': loc2, 't': matr.matrix[loc][loc2]})
+
+    time_df = pd.DataFrame(time_df)
+    
+
+    cur_p = 2
+    while cur_p != -1:
+        sub_tasks = tasks_df[tasks_df.prior == cur_p].drop(columns=["prior"])
+        sub_tasks = sub_tasks.sort_values(by="dates")
+
+        tmp = []
+
+        is_smth_changed = False
+
+        for i in range(len(sub_tasks)):
+            worker = None
+            point = None
+            ttime = None
+            assignTask = None
+
+            if sub_tasks.iloc[i].task == task3Id:
+                ttime = 4
+                sub_workers = get_sub_workers(sub_tasks.iloc[i].point_id, workers_df, time_df, 3, ttime)
+                if len(sub_workers) == 0:
+                    continue
+                worker = sub_workers.iloc[0].worker_id
+                point = sub_tasks.iloc[i].point_id
+                dt = sub_workers.iloc[0].diff_time
+
+            if sub_tasks.iloc[i].task == task2Id:
+                ttime = 2
+                sub_workers = get_sub_workers(sub_tasks.iloc[i].point_id, workers_df, time_df, 2, ttime)
+                if len(sub_workers) == 0:
+                    sub_workers = get_sub_workers(sub_tasks.iloc[i].point_id, workers_df, time_df, 3, ttime)
+                    if len(sub_workers) == 0:
+                        continue
+                worker = sub_workers.iloc[0].worker_id
+                point = sub_tasks.iloc[i].point_id
+                dt = sub_workers.iloc[0].diff_time
+
+            if sub_tasks.iloc[i].task == task1Id:
+                ttime = 1.5
+                sub_workers = get_sub_workers(sub_tasks.iloc[i].point_id, workers_df, time_df, 1, ttime)
+                if len(sub_workers) == 0:
+                    sub_workers = get_sub_workers(sub_tasks.iloc[i].point_id, workers_df, time_df, 2, ttime)
+                    if len(sub_workers) == 0:
+                        sub_workers = get_sub_workers(sub_tasks.iloc[i].point_id, workers_df, time_df, 3, ttime)
+                        if len(sub_workers) == 0:
+                            continue
+                worker = sub_workers.iloc[0].worker_id
+                assignTask = sub_tasks.iloc[i].id
+                point = sub_tasks.iloc[i].point_id
+                dt = sub_workers.iloc[0].diff_time
+
+            if worker is not None:
+
+                for taskTodo in tasksToDo:
+                    if taskTodo.id == assignTask:
+                        taskTodo.specialistId = worker
+                if worker not in workers_task:
+                    workers_task[worker] = [assignTask]
+                else:
+                    workers_task[worker].append(assignTask)
+                print(worker)
+                workers_df.loc[workers_df['worker_id'] == worker, "work_time"] = dt
+                workers_df.loc[workers_df['worker_id'] == worker, "base_id"] = point
+                is_smth_changed = True
+                tasks_df = tasks_df[tasks_df.point_id != point]
+        if not is_smth_changed:
+            cur_p -= 1
 
     repo.updateOrCreateAssignedTasks(tasksToDo)
 
