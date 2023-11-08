@@ -21,29 +21,61 @@ class MongoRepository:
         branchCollection = self.db["branches"] 
 
         branchesCursor = branchCollection.find({"is_office": False})
+
+        entities = []
+
+        for branch in  branchesCursor:
+            try:
+                entities.append(Branch(id = str(branch["_id"]), **branch))
+            except:
+                print(f"Error while parsing branch: {branch}")
         
-        return [Branch(id = str(branch["_id"]), **branch) for branch in  branchesCursor]
+        return entities
     
     def getAllSpecialists(self):
         specialistsCollection = self.db["specialists"]
 
         specialistsCursor = specialistsCollection.find({})
 
-        return [Specialist(id = str(spec["_id"]),**spec) for spec in specialistsCursor]
+        entities = []
+        for spec in specialistsCursor:
+            try:
+                entities.append(Specialist(id = str(spec["_id"]),**spec))
+            except:
+                print(f"Error while parsing specialist: {spec}")
+        
+        return entities
     
     def getAllTasks(self):
         taskCollection = self.db["tasks"]
 
         tasksCursor = taskCollection.find({})
+        entities = []
 
-        return [Task(id = str(task["_id"]),**task) for task in tasksCursor]
+        for task in tasksCursor:
+            try:
+                entities.append(Task(id = str(task["_id"]),**task))
+            except:
+                print(f"Error while parsing task: {task}")
+        
+        return entities
+
     
     def getAllActiveAssignedTasks(self):
         assignedTasksCollection = self.db["task-assigns"]
 
         assignedTasksCursor = assignedTasksCollection.find({'status': '0'})
 
-        return [AssignTask(id = str(assignedTask["_id"]),**assignedTask) for assignedTask in assignedTasksCursor]
+        entities = []
+        for assignedTask in assignedTasksCursor:
+            try:
+                entities.append(AssignTask(id = str(assignedTask["_id"]),**assignedTask))
+            except:
+                print(f"Error while parsing assignTask: {assignedTask}")
+
+
+        return entities
+        
     
     def updateOrCreateAssignedTasks(self, tasks: List[AssignTask]):
         assignedTasksCollection = self.db["task-assigns"]
@@ -51,8 +83,7 @@ class MongoRepository:
         for task in tasks:
           task_dict =  dict(task, priority = task.priority.value, status = task.status.value)
           task_dict["_id"] = task_dict.pop("id")
-          cnt = assignedTasksCollection.replace_one({"_id": task.id}, task_dict, upsert=True)    
-          print(cnt)
+          assignedTasksCollection.replace_one({"_id": task.id}, task_dict, upsert=True)    
     
 
 

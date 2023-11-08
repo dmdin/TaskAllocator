@@ -16,6 +16,6 @@ class Task(BaseModel):
   id: str
   name: str
   priority: TaskPriority
-  executionPeriodMinutes: int
+  executionPeriodMinutes: float
 #   conditions: List[appointmentConditions]
   level: EmployeeLevel

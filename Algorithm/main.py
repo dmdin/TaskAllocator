@@ -8,6 +8,16 @@ from bson.objectid import ObjectId
 from models.AssignTask import TaskAssignStatus
 import pandas as pd
 from get_time import MatrixWithMinutes
+import uvicorn
+import schedule
+from fastapi import FastAPI
+import time
+import time
+from concurrent.futures import ThreadPoolExecutor
+
+pd.options.mode.chained_assignment = None
+
+
 
 repo = MongoRepository()
 
@@ -80,7 +90,7 @@ def job():
     tasksToDo = repo.getAllActiveAssignedTasks()
     workers = repo.getAllSpecialists()
 
-    workers_df = pd.DataFrame([{'worker_id':t.id, 'base_id':'654aa119bff6a11489a51102', 'grade': int(t.level.value)+1} for t in workers])
+    workers_df = pd.DataFrame([{'worker_id':t.id, 'base_id':t.address, 'grade': int(t.level.value)+1} for t in workers])
     workers_df["work_time"] = [WORK_HOURS_PER_DAY * MINUTES_IN_HOUR] * workers_df.shape[0]
     
 
@@ -185,7 +195,7 @@ def job():
                     workers_task[worker] = [assignTask]
                 else:
                     workers_task[worker].append(assignTask)
-                print(worker)
+
                 workers_df.loc[workers_df['worker_id'] == worker, "work_time"] = dt
                 workers_df.loc[workers_df['worker_id'] == worker, "base_id"] = point
                 is_smth_changed = True
@@ -193,17 +203,33 @@ def job():
         if not is_smth_changed:
             cur_p -= 1
 
+        
+    print(workers_df)
+
     repo.updateOrCreateAssignedTasks(tasksToDo)
 
 
-
-job()
-
-# schedule.every(10).seconds.do()
+app = FastAPI()
 
 
-# while True:
-#     schedule.run_pending()
-#     time.sleep(1)
+@ app.get("/force-allocate-tasks")
+async def force_allocate_tasks():
+    job()
+    return "Задачи успешно распределены"
 
-   
+
+def run_fastapi():
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+
+def run_schedule():
+    schedule.every(10).seconds.do(job)
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+
+if __name__ == "__main__":
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        executor.submit(run_fastapi)
+        executor.submit(run_schedule)
