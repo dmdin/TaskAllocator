@@ -25,7 +25,7 @@ class SpecialistRPC implements ISpecialistRPC {
   private readonly ctx!: Context
 
   @rpc()
-  async create(specialist: ISpecialistModel): Promise<IResponse<ISpecialistModel>> {
+  async create(specialist: ISpecialistModel, ctx?: unknown): Promise<IResponse<ISpecialistModel>> {
     return {
       validation: { valid: true } as IValidationResult,
       entity: await repo.create(specialist)

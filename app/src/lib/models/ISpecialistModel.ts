@@ -1,4 +1,3 @@
-import type { IAddressModel } from './IAddressModel';
 import type { EmployeeLevel } from './ITaskModel';
 
 export interface ISpecialistModel {
@@ -6,7 +5,7 @@ export interface ISpecialistModel {
   firstName: string;
   lastName: string;
   fatherName: string;
-  address: IAddressModel;
+  address: string;
   email: string;
   level: EmployeeLevel;
 }

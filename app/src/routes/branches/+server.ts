@@ -2,7 +2,7 @@ import { json } from '@sveltejs/kit';
 
 import { Composer, rpc } from '$lib/chord';
 import type { IBranchModel } from '$lib/models/IBranchModel';
-
+import sveltekit from '$lib/chord/middlewares/sveltekit';
 import type { IBranchRPC, IPagingParams } from './types';
 import { Repository } from '$lib/repositories/Repository';
 import { BranchSchema } from '$lib/repositories/mongoSchemes';
@@ -41,7 +41,8 @@ class BranchRPC implements IBranchRPC {
 }
 
 export const composer = new Composer([BranchRPC], { route: '/branches' });
-
+composer.use(sveltekit());
 export async function POST(event) {
+  debugger;
   return json(await composer.exec(event));
 }

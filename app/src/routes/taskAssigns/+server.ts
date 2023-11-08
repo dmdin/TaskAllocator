@@ -3,6 +3,7 @@ import { json } from '@sveltejs/kit';
 import { Composer, rpc } from '$lib/chord';
 import type { ITaskAssignRPC, IPagingParams } from './types';
 import { Repository } from '$lib/repositories/Repository';
+import sveltekit from '$lib/chord/middlewares/sveltekit';
 import type { ITaskAssign } from '$lib/models/ITaskAssign';
 import { TaskAssignScheme } from '$lib/repositories/mongoSchemes';
 import { TaskAssignRepository } from '$lib/repositories/TaskAssignRepository';
@@ -68,12 +69,11 @@ class TaskAssignRPC implements ITaskAssignRPC {
   }
 }
 
-const composer = new Composer([TaskAssignRPC], { route: '/test' });
-
-export async function POST({ request }) {
+const composer = new Composer([TaskAssignRPC], { route: '/taskAssigns' });
+composer.use(sveltekit());
+export async function POST(event) {
   debugger;
-  const body = await request.json();
-  return json(await composer.exec(body));
+  return json(await composer.exec(event));
 }
 
 export async function GET() {
