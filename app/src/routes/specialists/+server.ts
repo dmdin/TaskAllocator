@@ -1,17 +1,29 @@
 import { json } from '@sveltejs/kit';
 
-import { Composer, rpc } from '$lib/chord';
+import { Composer, depends, rpc } from '$lib/chord/dev';
 import type { ISpecialistRPC, IPagingParams } from './types';
-import { Repository } from '$lib/repositories/Repository';
-import { SpecialistSchema } from '$lib/repositories/mongoSchemes';
+import type { RequestEvent } from '../$types';
 import type { ISpecialistModel } from '$lib/models/ISpecialistModel';
 import type { IValidationResult } from '$lib/repositories/IValidationResult';
 import type { IResponse } from '$lib/models/IResponse';
 import { SpecialistsRepository } from '$lib/repositories/SpecialistRepository';
+import sveltekit from '$lib/chord/middlewares/sveltekit';
+
 
 const repo = new SpecialistsRepository();
 
+interface Context {
+  sb: unknown
+}
+
 class SpecialistRPC implements ISpecialistRPC {
+
+  @depends()
+  private readonly rpc2!: unknown;
+
+  @depends()
+  private readonly ctx!: Context
+
   @rpc()
   async create(specialist: ISpecialistModel): Promise<IResponse<ISpecialistModel>> {
     return {
@@ -61,7 +73,8 @@ class SpecialistRPC implements ISpecialistRPC {
 }
 
 export const composer = new Composer([SpecialistRPC], { route: '/specialists' });
+composer.use(sveltekit());
 
-export async function POST(event) {
+export async function POST(event: RequestEvent) {
   return json(await composer.exec(event));
 }

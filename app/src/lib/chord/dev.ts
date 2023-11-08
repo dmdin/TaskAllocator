@@ -119,7 +119,7 @@ export class Composer {
     const { method, args } = body;
     const methodDesc = Composer.methods.get(method);
     if (!method) throw new EvalError(`Cannot find method: ${method}`);
-
+    console.log(method)
     const { target, descriptor } = methodDesc as MethodDescription;
 
     // Inject ctx dependency
