@@ -18,4 +18,9 @@
   });
 </script>
 
-<slot />
+
+<header />
+<main class="w-full h-full p-2">
+  <slot />
+</main>
+<footer />

@@ -5,6 +5,7 @@
   import type { Wrapped, Unwrapped } from './types';
 
   export let data;
+  
   const { schema } = data;
   onMount(async () => {
     const client = initClient<Wrapped>(schema);

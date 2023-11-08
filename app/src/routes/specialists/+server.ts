@@ -10,12 +10,13 @@ import type { IValidationResult } from '$lib/repositories/IValidationResult';
 import type { IResponse } from '$lib/models/IResponse';
 import { SpecialistsRepository } from '$lib/repositories/SpecialistRepository';
 import type { RequestEvent } from '../$types';
+import {BranchRPC} from '../branches/+server'
 
 const repo = new SpecialistsRepository();
 
 class SpecialistRPC implements ISpecialistRPC {
   @rpc()
-  async create(specialist: ISpecialistModel, ctx?: unknown): Promise<IResponse<ISpecialistModel>> {
+  async create(specialist: ISpecialistModel): Promise<IResponse<ISpecialistModel>> {
     return {
       validation: { valid: true } as IValidationResult,
       entity: await repo.create(specialist)
@@ -62,7 +63,7 @@ class SpecialistRPC implements ISpecialistRPC {
   }
 }
 
-export const composer = new Composer([SpecialistRPC], { route: '/specialists' });
+export const composer = new Composer([SpecialistRPC, BranchRPC], { route: '/specialists' });
 composer.use(sveltekit());
 export async function POST(event) {
   debugger;
