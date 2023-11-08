@@ -1,5 +1,6 @@
 import os
 from pymongo import MongoClient
+from dotenv.main import load_dotenv
 
 class MatrixWithMinutes:
     def __init__(self):
@@ -7,6 +8,7 @@ class MatrixWithMinutes:
         self.read_mongo_matrix()
 
     def read_mongo_matrix(self):
+        load_dotenv()
         mongo_url = os.environ.get('MONGO_CONNECTION_STRING')
         client = MongoClient(mongo_url)
         db = client["task-allocator"]
@@ -24,4 +26,4 @@ class MatrixWithMinutes:
 
 if __name__ == "__main__":
     matr = MatrixWithMinutes()
-    print(matr.get('', ''))
+    print(matr.get('654aa10dbff6a11489a510ef', '654aa10ebff6a11489a510f0'))
