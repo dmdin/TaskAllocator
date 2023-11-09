@@ -137,7 +137,7 @@
   </div>
 </Modal>
 
-<div class="m-auto w-3/4 h-full flex flex-col items-center justify-center">
+<div class="m-auto w-3/4 h-3/4 flex flex-col items-center justify-center">
   <button on:click={startCreating} class="my-2 self-end btn btn-primary !font-bold">
     <Icon icon="ph:user" width="20" /> Создать</button
   >

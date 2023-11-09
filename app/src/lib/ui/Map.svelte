@@ -1,5 +1,9 @@
 <script>
   import {PUBLIC_MAP_KEY} from '$env/static/public'
+  import { browser } from '$app/environment'; 
+  import { onMount } from 'svelte';
+  import {Moon} from 'svelte-loading-spinners';
+
   export let locations = [
     {
       latitude: 55.75361503443606,
@@ -10,48 +14,48 @@
   export let center = [55.75361503443606, 37.620883000000006];
   export let zoom = 17;
 
-  let Loaded = false;
+  let loaded = false;
+  let map
 
   function loadMap() {
-    var myMap = new ymaps.Map('map', {
+    let map = new ymaps.Map('map', {
       center: center,
       zoom: zoom
     });
     // Создаем геообъект с типом геометрии "Точка".
-    const points = myMap.geoObjects;
+    const points = map.geoObjects;
     locations.forEach((location) => {
       points.add(
-        new ymaps.Placemark(
+        new map.Placemark(
           [location.latitude, location.longitude],
           { balloonContent: location.name },
           {}
         )
       );
     });
-    Loaded = true;
   }
+
+  // onMount(() => {
+    // console.log(ymaps)
+  // }) 
 </script>
 
 <svelte:head>
+  {#if browser}
   <script
     src="https://api-maps.yandex.ru/2.1/?apikey={PUBLIC_MAP_KEY}&lang=en_US"
     type="text/javascript"
-    on:load={() => ymaps.ready(loadMap)}
-  >
-  </script>
+    on:load={() => {ymaps.ready(loadMap);}}
+  />
+  {/if}
 </svelte:head>
 
-<div class="mt-[100px]">
-  {#if Loaded === false}
-    <h1>Loading...</h1>
+<div class="">
+  {#if !loaded}
+    <Moon/>
   {/if}
 </div>
 
-<div id="map"></div>
+<div id="map" class="w-[500px] h-[400px]"></div>
 
-<style>
-  #map {
-    width: 720px;
-    height: 540px;
-  }
-</style>
+
