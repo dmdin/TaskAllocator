@@ -27,9 +27,7 @@ export class TaskAssignRepository extends Repository<ITaskAssign> {
   @ensureConnected
   async getBySpecialistEmail(email: string, onlyActive: boolean): Promise<ITaskAssignFullInfo[]> {
     var specialistRepo = new SpecialistsRepository();
-    const branchRepo = new Repository<IBranchModel>('branch', BranchSchema);
-    const taskRepo = new Repository<ITaskModel>('tasks', TaskScheme);
-
+  
     var specialist = await specialistRepo.getByEmail(email);
 
     let specialistId = specialist?.id ?? '';
@@ -39,7 +37,24 @@ export class TaskAssignRepository extends Repository<ITaskAssign> {
       status: { $in: this.getAvailableStatuses(onlyActive) }
     });
 
+    return await this.mapToFyllInfo(tasks)
+  }
+
+  @ensureConnected
+  async getForManager(onlyActive: boolean): Promise<ITaskAssignFullInfo[]> {
+    let tasks = await this.model.find({
+      status: { $in: this.getAvailableStatuses(onlyActive) }
+    });
+
+    return await this.mapToFyllInfo(tasks)
+  }
+
+
+  async mapToFyllInfo(tasks: any[]): Promise<ITaskAssignFullInfo[]>{
     let result: ITaskAssignFullInfo[] = []
+
+    const branchRepo = new Repository<IBranchModel>('branch', BranchSchema);
+    const taskRepo = new Repository<ITaskModel>('tasks', TaskScheme);
 
     for(let i=0;i<tasks.length;i++){
 
@@ -65,6 +80,7 @@ export class TaskAssignRepository extends Repository<ITaskAssign> {
           priority: assignTask.priority,
           status: assignTask.status})
     }
+
     return result;
   }
 
