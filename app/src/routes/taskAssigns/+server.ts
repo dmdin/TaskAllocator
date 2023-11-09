@@ -55,6 +55,11 @@ class TaskAssignRPC implements ITaskAssignRPC {
   }
 
   @rpc()
+  async getForManager(onlyActive: boolean): Promise<ITaskAssignFullInfo[]> {
+    return await taskAssignRepo.getForManager(onlyActive);
+  }
+
+  @rpc()
   async update(taskAssign: ITaskAssign): Promise<ITaskAssign | null> {
     let result: ITaskAssign | null = null;
     if (taskAssign.id != null) {
