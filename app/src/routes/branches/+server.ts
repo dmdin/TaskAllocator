@@ -8,7 +8,7 @@ import { Repository } from '$lib/repositories/Repository';
 import { BranchSchema } from '$lib/repositories/mongoSchemes';
 
 const repo = new Repository<IBranchModel>('branch', BranchSchema);
-class BranchRPC implements IBranchRPC {
+export class BranchRPC implements IBranchRPC {
   @rpc()
   async create(branch: IBranchModel): Promise<IBranchModel> {
     return await repo.create(branch);
