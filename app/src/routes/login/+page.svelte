@@ -29,7 +29,7 @@
 </script>
 
 <main class="flex flex-col items-center justify-center h-full">
-  <h1>Login</h1>
+  <h1>Войти</h1>
   <form action="?/login" method="POST" class="auth-form">
     <label class="label" for=""> Email </label>
     <input class="input input-bordered" type="text" name="email" />

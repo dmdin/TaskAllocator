@@ -56,6 +56,7 @@
           </ul>
         </li>
         <li><a href="/tasks">Задачи</a></li>
+        <li><a href="/taskAssigns">Текущие задачи</a></li>
       </ul>
     </div>
     <a class="btn btn-ghost normal-case text-xl">
@@ -75,6 +76,7 @@
         </details>
       </li>
       <li><a href="/tasks">Задачи</a></li>
+      <li><a href="/taskAssigns">Текущие задачи</a></li>
     </ul>
   </div>
   <div class="navbar-end">
