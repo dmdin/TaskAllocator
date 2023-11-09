@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 
-import { Composer, depends, rpc } from '$lib/chord/dev';
+import { Composer, depends, rpc } from '$lib/chord';
 import type { ISpecialistRPC, IPagingParams } from './types';
 import type { RequestEvent } from '../$types';
 import type { ISpecialistModel } from '$lib/models/ISpecialistModel';
@@ -8,6 +8,7 @@ import type { IValidationResult } from '$lib/repositories/IValidationResult';
 import type { IResponse } from '$lib/models/IResponse';
 import { SpecialistsRepository } from '$lib/repositories/SpecialistRepository';
 import sveltekit from '$lib/chord/middlewares/sveltekit';
+import { BranchRPC } from '../branches/+server';
 
 
 const repo = new SpecialistsRepository();
