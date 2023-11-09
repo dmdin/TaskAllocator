@@ -88,6 +88,11 @@ def job():
     repo = MongoRepository()
     branches = repo.getAllBranches()
     tasksToDo = repo.getAllActiveAssignedTasks()
+
+    for ttd in tasksToDo:
+        ttd.specialistId = None
+        ttd.priority = TaskPriority.High
+
     workers = repo.getAllSpecialists()
 
     workers_df = pd.DataFrame([{'worker_id':t.id, 'base_id':t.address, 'grade': int(t.level.value)+1} for t in workers])
@@ -136,6 +141,8 @@ def job():
 
     time_df = pd.DataFrame(time_df)
     
+
+    worker_counts = {}
 
     cur_p = 2
     while cur_p != -1:
@@ -187,14 +194,15 @@ def job():
                 dt = sub_workers.iloc[0].diff_time
 
             if worker is not None:
-
-                for taskTodo in tasksToDo:
-                    if taskTodo.id == assignTask:
-                        taskTodo.specialistId = worker
                 if worker not in workers_task:
                     workers_task[worker] = [assignTask]
                 else:
                     workers_task[worker].append(assignTask)
+
+                for taskTodo in tasksToDo:
+                    if taskTodo.id == assignTask:
+                        taskTodo.specialistId = worker
+                        taskTodo.taskNumber = len(workers_task[worker])
 
                 workers_df.loc[workers_df['worker_id'] == worker, "work_time"] = dt
                 workers_df.loc[workers_df['worker_id'] == worker, "base_id"] = point
@@ -203,33 +211,38 @@ def job():
         if not is_smth_changed:
             cur_p -= 1
 
-        
-    print(workers_df)
 
-    repo.updateOrCreateAssignedTasks(tasksToDo)
+    result_tasks = []
 
+    for t in tasksToDo:
+        if(t.specialistId is not None):
+            result_tasks.append(t)
+            
+    repo.updateOrCreateAssignedTasks(result_tasks)
 
-app = FastAPI()
+job()
 
-
-@ app.get("/force-allocate-tasks")
-async def force_allocate_tasks():
-    job()
-    return "Задачи успешно распределены"
-
-
-def run_fastapi():
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+# app = FastAPI()
 
 
-def run_schedule():
-    schedule.every(10).seconds.do(job)
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
+# @ app.get("/force-allocate-tasks")
+# async def force_allocate_tasks():
+#     job()
+#     return "Задачи успешно распределены"
 
-if __name__ == "__main__":
-    with ThreadPoolExecutor(max_workers=2) as executor:
-        executor.submit(run_fastapi)
-        executor.submit(run_schedule)
+
+# def run_fastapi():
+#     import uvicorn
+#     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+
+# def run_schedule():
+#     schedule.every(10).seconds.do(job)
+#     while True:
+#         schedule.run_pending()
+#         time.sleep(1)
+
+# if __name__ == "__main__":
+#     with ThreadPoolExecutor(max_workers=2) as executor:
+#         executor.submit(run_fastapi)
+#         executor.submit(run_schedule)

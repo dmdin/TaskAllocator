@@ -6,6 +6,7 @@ from models.Task import Task
 from models.AssignTask import AssignTask, TaskAssignStatus
 import os
 from typing import List
+from bson.objectid import ObjectId
 
 
 
@@ -37,11 +38,14 @@ class MongoRepository:
 
         specialistsCursor = specialistsCollection.find({})
 
+
         entities = []
         for spec in specialistsCursor:
             try:
-                entities.append(Specialist(id = str(spec["_id"]),**spec))
-            except:
+                entities.append(Specialist(id = str(spec["_id"]), firstName = str(spec["firstName"]), lastName = str(spec["lastName"]),
+                       fatherName = str(spec["fatherName"]), address=str(spec["address"]), level = int(spec["level"]) ))
+            except e:
+                print(e)
                 print(f"Error while parsing specialist: {spec}")
         
         return entities
@@ -82,8 +86,8 @@ class MongoRepository:
         
         for task in tasks:
           task_dict =  dict(task, priority = task.priority.value, status = task.status.value)
-          task_dict["_id"] = task_dict.pop("id")
-          assignedTasksCollection.replace_one({"_id": task.id}, task_dict, upsert=True)    
+          task_dict["_id"] = ObjectId(task_dict.pop("id"))
+          assignedTasksCollection.replace_one({"_id":  task_dict["_id"]}, task_dict, upsert=True)    
     
 
 

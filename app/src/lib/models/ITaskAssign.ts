@@ -1,8 +1,7 @@
 import type { TaskPriority } from './ITaskModel';
 
 export enum TaskAssignStatus {
-  Created,
-  Assigned,
+  Todo = 0,
   InWork,
   Completed
 }

@@ -1,12 +1,13 @@
 import type { IBranchModel } from '$lib/models/IBranchModel';
 import type { ISpecialistModel } from '$lib/models/ISpecialistModel';
+import type {ITaskAssignFullInfo} from '$lib/models/ITaskAssignFullInfo'
 import { TaskAssignStatus, type ITaskAssign } from '$lib/models/ITaskAssign';
 import type { ITaskModel } from '$lib/models/ITaskModel';
 import { isValidObjectId } from 'mongoose';
 import type { IValidationResult } from './IValidationResult';
 import { Repository } from './Repository';
 import { ensureConnected } from './mongo';
-import { BranchSchema, SpecialistSchema, TaskAssignScheme } from './mongoSchemes';
+import { BranchSchema, SpecialistSchema, TaskAssignScheme, TaskScheme } from './mongoSchemes';
 import { ToModel } from './toModel';
 import { SpecialistsRepository } from './SpecialistRepository';
 
@@ -24,8 +25,10 @@ export class TaskAssignRepository extends Repository<ITaskAssign> {
   }
 
   @ensureConnected
-  async getBySpecialistEmail(email: string, onlyActive: boolean): Promise<(ITaskAssign | null)[]> {
+  async getBySpecialistEmail(email: string, onlyActive: boolean): Promise<ITaskAssignFullInfo[]> {
     var specialistRepo = new SpecialistsRepository();
+    const branchRepo = new Repository<IBranchModel>('branch', BranchSchema);
+    const taskRepo = new Repository<ITaskModel>('tasks', TaskScheme);
 
     var specialist = await specialistRepo.getByEmail(email);
 
@@ -35,12 +38,41 @@ export class TaskAssignRepository extends Repository<ITaskAssign> {
       specialistId: specialistId.toString(),
       status: { $in: this.getAvailableStatuses(onlyActive) }
     });
-    return tasks.map(ToModel<ITaskAssign>);
+
+    let result: ITaskAssignFullInfo[] = []
+
+    for(let i=0;i<tasks.length;i++){
+
+        let assignTask = tasks[i];
+
+        let branch = await branchRepo.get(assignTask.branchId)
+        let task = await taskRepo.get(assignTask.taskId)
+
+        result.push({
+          id: String(assignTask._id),
+          task: {
+            id: task?.id,
+            name: task?.name,
+          },
+          branch: {
+            id: branch?.id,
+            address: branch?.address?.address,
+            latitude: branch?.address?.latitude,
+            longitude: branch?.address?.longitude
+          },
+          taskNum: assignTask.taskNumber,
+          created: assignTask.date,
+          priority: assignTask.priority,
+          status: assignTask.status})
+    }
+    return result;
   }
 
   @ensureConnected
   async updateStatus(id: string, status: TaskAssignStatus): Promise<ITaskAssign | null> {
+    console.log(id)
     let currentEntity = await this.model.findById(id);
+    console.log(currentEntity)
 
     if (currentEntity != null) {
       currentEntity.status = status;
@@ -115,14 +147,12 @@ export class TaskAssignRepository extends Repository<ITaskAssign> {
 
     if (onlyActive) {
       availableTaskStatuses = [
-        TaskAssignStatus.Assigned,
-        TaskAssignStatus.InWork,
-        TaskAssignStatus.Completed
+        TaskAssignStatus.Todo,
+        TaskAssignStatus.InWork
       ];
     } else {
       availableTaskStatuses = [
-        TaskAssignStatus.Created,
-        TaskAssignStatus.Assigned,
+        TaskAssignStatus.Todo,
         TaskAssignStatus.InWork,
         TaskAssignStatus.Completed
       ];

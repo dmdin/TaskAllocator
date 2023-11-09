@@ -8,6 +8,7 @@ import type { IValidationResult } from '$lib/repositories/IValidationResult';
 import type { IResponse } from '$lib/models/IResponse';
 import { SpecialistsRepository } from '$lib/repositories/SpecialistRepository';
 import sveltekit from '$lib/chord/middlewares/sveltekit';
+import { BranchRPC } from '../branches/+server';
 
 
 const repo = new SpecialistsRepository();

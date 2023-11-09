@@ -10,6 +10,7 @@ import { TaskAssignRepository } from '$lib/repositories/TaskAssignRepository';
 import type { IValidationResult } from '$lib/repositories/IValidationResult';
 import type { IResponse } from '$lib/models/IResponse';
 import type { IUpdateTaskAssignStatusModel } from '$lib/models/IUpdateTaskAssignStatusModel';
+import type { ITaskAssignFullInfo } from '$lib/models/ITaskAssignFullInfo';
 
 var taskAssignRepo = new TaskAssignRepository('task-assign', TaskAssignScheme);
 class TaskAssignRPC implements ITaskAssignRPC {
@@ -49,7 +50,7 @@ class TaskAssignRPC implements ITaskAssignRPC {
   }
 
   @rpc()
-  async getBySpecialistEmail(params: IFindAssignedTaskByEmail): Promise<(ITaskAssign | null)[]> {
+  async getBySpecialistEmail(params: IFindAssignedTaskByEmail): Promise<ITaskAssignFullInfo[]> {
     return await taskAssignRepo.getBySpecialistEmail(params.email, params.onlyActive);
   }
 
