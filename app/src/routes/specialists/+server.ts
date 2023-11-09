@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 
-import { Composer, depends, rpc } from '$lib/chord/dev';
+import { Composer, depends, rpc } from '$lib/chord';
 import type { ISpecialistRPC, IPagingParams } from './types';
 import type { RequestEvent } from '../$types';
 import type { ISpecialistModel } from '$lib/models/ISpecialistModel';
