@@ -10,20 +10,18 @@ import { SpecialistsRepository } from '$lib/repositories/SpecialistRepository';
 import sveltekit from '$lib/chord/middlewares/sveltekit';
 import { BranchRPC } from '../branches/+server';
 
-
 const repo = new SpecialistsRepository();
 
 interface Context {
-  sb: unknown
+  sb: unknown;
 }
 
 class SpecialistRPC implements ISpecialistRPC {
-
   @depends()
   private readonly rpc2!: unknown;
 
   @depends()
-  private readonly ctx!: Context
+  private readonly ctx!: Context;
 
   @rpc()
   async create(specialist: ISpecialistModel): Promise<IResponse<ISpecialistModel>> {

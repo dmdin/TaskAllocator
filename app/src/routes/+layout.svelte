@@ -26,7 +26,7 @@
   <header class="navbar bg-base-100 fixed z-10 top-0">
     <div class="navbar-start">
       <div class="dropdown">
-        <label tabindex="0" class="btn btn-ghost lg:hidden">
+        <label tabindex="0" class="btn btn-ghost lg:hidden w-[70px]">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="h-5 w-5"
@@ -57,8 +57,8 @@
           <li><a href="/taskAssigns">Текущие задачи</a></li>
         </ul>
       </div>
-      <a class="btn btn-ghost normal-case text-xl">
-        <Logo />
+      <a class="btn-ghost w-auto normal-case text-xl">
+        <Logo class="w-[70px] md:w-[150px]" />
       </a>
     </div>
     <div class="navbar-center hidden lg:flex">

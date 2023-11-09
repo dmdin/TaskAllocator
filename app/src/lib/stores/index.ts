@@ -1,4 +1,4 @@
-import { writable } from "svelte/store";
-import type { Writable } from "svelte/store";
+import { writable } from 'svelte/store';
+import type { Writable } from 'svelte/store';
 
-export const theme: Writable<'light' | 'c'> = writable('light')
+export const theme: Writable<'light' | 'c'> = writable('light');

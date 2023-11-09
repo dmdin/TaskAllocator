@@ -1,8 +1,8 @@
 <script>
-  import {PUBLIC_MAP_KEY} from '$env/static/public'
-  import { browser } from '$app/environment'; 
+  import { PUBLIC_MAP_KEY } from '$env/static/public';
+  import { browser } from '$app/environment';
   import { onMount } from 'svelte';
-  import {Moon} from 'svelte-loading-spinners';
+  import { Moon } from 'svelte-loading-spinners';
 
   export let locations = [
     {
@@ -14,8 +14,8 @@
   export let center = [55.75361503443606, 37.620883000000006];
   export let zoom = 17;
 
+  let map;
   let loaded = false;
-  let map
 
   function loadMap() {
     let map = new ymaps.Map('map', {
@@ -26,36 +26,36 @@
     const points = map.geoObjects;
     locations.forEach((location) => {
       points.add(
-        new map.Placemark(
+        new ymaps.Placemark(
           [location.latitude, location.longitude],
           { balloonContent: location.name },
           {}
         )
       );
     });
+    loaded = true;
   }
 
-  // onMount(() => {
-    // console.log(ymaps)
-  // }) 
+  function initYmaps() {
+    ymaps.ready(loadMap);
+  }
 </script>
 
 <svelte:head>
   {#if browser}
-  <script
-    src="https://api-maps.yandex.ru/2.1/?apikey={PUBLIC_MAP_KEY}&lang=en_US"
-    type="text/javascript"
-    on:load={() => {ymaps.ready(loadMap);}}
-  />
+    <script
+      src="https://api-maps.yandex.ru/2.1/?apikey={PUBLIC_MAP_KEY}&lang=en_US"
+      type="text/javascript"
+      on:load={initYmaps}
+    ></script>
   {/if}
 </svelte:head>
 
-<div class="">
+<div class="w-full h-full max-w-2xl">
   {#if !loaded}
-    <Moon/>
+    <div class="h-full grid place-content-center">
+      <Moon />
+    </div>
   {/if}
+  <div id="map" class="w-full h-full" />
 </div>
-
-<div id="map" class="w-[500px] h-[400px]"></div>
-
-

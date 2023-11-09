@@ -1,27 +1,26 @@
 import { json } from '@sveltejs/kit';
 import type { RequestEvent } from '../$types';
-import { Composer, rpc, depends} from '$lib/chord/dev';
+import { Composer, rpc, depends } from '$lib/chord/dev';
 import sveltekit from '$lib/chord/middlewares/sveltekit';
 import type { ITestRPC, ITestRPC2 } from './types';
 
 // THIS IS CONTROLLER
 
 interface Context {
-  sb: unknown
+  sb: unknown;
 }
 
 class TestRPC implements ITestRPC {
-
   @depends()
   private readonly rpc2!: unknown;
 
   @depends()
-  private readonly ctx!: Context
+  private readonly ctx!: Context;
 
   @rpc()
   dbReq(param: number): string {
-    console.log('!ctx injected ', this.rpc2)
-    console.log('ctx injected ', this.ctx)
+    console.log('!ctx injected ', this.rpc2);
+    console.log('ctx injected ', this.ctx);
     return `Hello from TestRPC, ${param}`;
   }
   @rpc()

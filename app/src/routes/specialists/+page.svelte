@@ -2,7 +2,6 @@
   import { initClient } from '$lib/chord';
   import Icon from '@iconify/svelte';
 
-  import axios from 'axios';
   import { onMount } from 'svelte';
   import type { ISpecialistRPC, ISpecialistModel, Wrapped } from './types';
   import Modal from '$lib/ui/Modal.svelte';

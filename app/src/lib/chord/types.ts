@@ -6,10 +6,9 @@ export interface MethodDescription {
 }
 
 export interface PropertyDescription {
-  key: string,
-  target: Target,
+  key: string;
+  target: Target;
 }
-
 
 export interface MethodMetadata {
   returnType: string;
@@ -35,8 +34,8 @@ export interface Target {
   constructor: { name: string };
 }
 
-export type PropKey = string | symbol
+export type PropKey = string | symbol;
 
 export type ComposerModels = unknown[] | Record<string, unknown>;
 
-export type ClassConstructor<T extends object> = (new (...params: any) => T)
+export type ClassConstructor<T extends object> = new (...params: any) => T;
