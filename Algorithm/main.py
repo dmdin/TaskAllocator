@@ -95,7 +95,7 @@ def job():
 
     workers = repo.getAllSpecialists()
 
-    workers_df = pd.DataFrame([{'worker_id':t.id, 'base_id':t.address, 'grade': int(t.level.value)+1} for t in workers])
+    workers_df = pd.DataFrame([{'worker_id':t.id, 'base_id':t.address, 'current_id': t.address, 'grade': int(t.level.value)+1} for t in workers])
     workers_df["work_time"] = [WORK_HOURS_PER_DAY * MINUTES_IN_HOUR] * workers_df.shape[0]
     
 
@@ -123,10 +123,6 @@ def job():
 
     tasksToDo = sort_tasks(tasksToDo)
 
-    for i in tasksToDo:
-        i.specialistId = None
-
-
     tasks_df = pd.DataFrame([{'id': t.id, 'point_id':t.branchId, 'prior': int(t.priority.value), 'task': t.taskId, 'dates': t.date} for t in tasksToDo])
 
     workers_task = {}
@@ -140,9 +136,6 @@ def job():
             time_df.append({'id1': loc, 'id2': loc2, 't': matr.matrix[loc][loc2]})
 
     time_df = pd.DataFrame(time_df)
-    
-
-    worker_counts = {}
 
     cur_p = 2
     while cur_p != -1:
@@ -161,7 +154,7 @@ def job():
 
             if sub_tasks.iloc[i].task == task3Id:
                 ttime = 4
-                sub_workers = get_sub_workers(sub_tasks.iloc[i].point_id, workers_df, time_df, 3, ttime)
+                sub_workers = get_sub_workers(sub_tasks.iloc[i].point_id, workers_df, time_df, 2, ttime)
                 if len(sub_workers) == 0:
                     continue
                 worker = sub_workers.iloc[0].worker_id
@@ -170,9 +163,9 @@ def job():
 
             if sub_tasks.iloc[i].task == task2Id:
                 ttime = 2
-                sub_workers = get_sub_workers(sub_tasks.iloc[i].point_id, workers_df, time_df, 2, ttime)
+                sub_workers = get_sub_workers(sub_tasks.iloc[i].point_id, workers_df, time_df, 1, ttime)
                 if len(sub_workers) == 0:
-                    sub_workers = get_sub_workers(sub_tasks.iloc[i].point_id, workers_df, time_df, 3, ttime)
+                    sub_workers = get_sub_workers(sub_tasks.iloc[i].point_id, workers_df, time_df,2, ttime)
                     if len(sub_workers) == 0:
                         continue
                 worker = sub_workers.iloc[0].worker_id
@@ -181,11 +174,11 @@ def job():
 
             if sub_tasks.iloc[i].task == task1Id:
                 ttime = 1.5
-                sub_workers = get_sub_workers(sub_tasks.iloc[i].point_id, workers_df, time_df, 1, ttime)
+                sub_workers = get_sub_workers(sub_tasks.iloc[i].point_id, workers_df, time_df, 0, ttime)
                 if len(sub_workers) == 0:
-                    sub_workers = get_sub_workers(sub_tasks.iloc[i].point_id, workers_df, time_df, 2, ttime)
+                    sub_workers = get_sub_workers(sub_tasks.iloc[i].point_id, workers_df, time_df, 1, ttime)
                     if len(sub_workers) == 0:
-                        sub_workers = get_sub_workers(sub_tasks.iloc[i].point_id, workers_df, time_df, 3, ttime)
+                        sub_workers = get_sub_workers(sub_tasks.iloc[i].point_id, workers_df, time_df, 2, ttime)
                         if len(sub_workers) == 0:
                             continue
                 worker = sub_workers.iloc[0].worker_id
@@ -211,36 +204,46 @@ def job():
         if not is_smth_changed:
             cur_p -= 1
 
-
-    result_tasks = []
+    tasks_by_spec = {}
 
     for t in tasksToDo:
-        if(t.specialistId is not None):
-            result_tasks.append(t)
-            
-    repo.updateOrCreateAssignedTasks(result_tasks)
+        if t.specialistId is not None:
+            if t.specialistId not in tasks_by_spec:
+                tasks_by_spec[t.specialistId] = [t]
+            else:
+                tasks_by_spec[t.specialistId].append(t)
 
-app = FastAPI()
-
-
-@ app.get("/force-allocate-tasks")
-async def force_allocate_tasks():
-    job()
-    return "Задачи успешно распределены"
+    updated_tasks = []
+    for t in tasks_by_spec:
+        pass
+    
 
 
-def run_fastapi():
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+    repo.updateOrCreateAssignedTasks(tasksToDo)
+
+# app = FastAPI()
 
 
-def run_schedule():
-    schedule.every(1).days.do(job)
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
+job()
+# @ app.get("/force-allocate-tasks")
+# async def force_allocate_tasks():
+#     job()
+#     return "Задачи успешно распределены"
 
-if __name__ == "__main__":
-    with ThreadPoolExecutor(max_workers=2) as executor:
-        executor.submit(run_fastapi)
-        executor.submit(run_schedule)
+
+# def run_fastapi():
+#     import uvicorn
+#     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+
+# def run_schedule():
+#     schedule.every(1).days.do(job)
+#     while True:
+#         schedule.run_pending()
+#         time.sleep(1)
+
+# if __name__ == "__main__":
+#     with ThreadPoolExecutor(max_workers=2) as executor:
+#         executor.submit(run_fastapi)
+#         executor.submit(run_schedule)
