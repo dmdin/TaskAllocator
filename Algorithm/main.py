@@ -78,12 +78,14 @@ def job():
 
     #Доставка карт и материалов
     task1Id = '654aa25628fd5a4d65e9e583'
+    #1.5 час
 
     #Обучение агента
     task2Id = '654aa20a28fd5a4d65e9e581'
-
+    #2 часа
     #Выезд на точку для стимулирования выдач
     task3Id = '654aa1e128fd5a4d65e9e57e'
+    # 4 часа
 
     repo = MongoRepository()
     branches = repo.getAllBranches()
