@@ -225,7 +225,7 @@ def job():
 
     repo.updateOrCreateAssignedTasks(tasksToDo)
 
-# app = FastAPI()
+app = FastAPI()
 
 
 
