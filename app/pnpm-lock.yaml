@@ -46,6 +46,9 @@ devDependencies:
   daisyui:
     specifier: ^3.9.4
     version: 3.9.4
+  dayjs:
+    specifier: ^1.11.10
+    version: 1.11.10
   eslint:
     specifier: ^8.28.0
     version: 8.28.0
@@ -1282,6 +1285,10 @@ packages:
       tailwindcss: 3.3.5
     transitivePeerDependencies:
       - ts-node
+    dev: true
+
+  /dayjs@1.11.10:
+    resolution: {integrity: sha512-vjAczensTgRcqDERK0SR2XMwsF/tSvnvlv6VcF2GIhg6Sx4yOIt/irsr1RDJsKiIyBzJDpCoXiWWq28MqH2cnQ==}
     dev: true
 
   /debug@2.6.9:

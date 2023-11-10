@@ -3,7 +3,6 @@ export type { ISpecialistModel } from '$lib/models/ISpecialistModel';
 import type { IPagingParams, IBranchRPC } from '../branches/types';
 import type { IResponse } from '$lib/models/IResponse';
 
-
 export interface ISpecialistRPC {
   getAll(params: IPagingParams): Promise<ISpecialistModel[]>;
   update(specialist: ISpecialistModel): Promise<ISpecialistModel>;

@@ -1,9 +1,4 @@
-<script>
-  export let size = 150
-</script>
-
-
-<div class="mt-2" style="width: {size}px;">
+<div class={$$props.class}>
   <svg
     viewBox="0 0 460 92"
     fill="none"

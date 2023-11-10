@@ -1,6 +1,6 @@
 import type { IBranchModel } from '$lib/models/IBranchModel';
 import type { ISpecialistModel } from '$lib/models/ISpecialistModel';
-import type {ITaskAssignFullInfo} from '$lib/models/ITaskAssignFullInfo'
+import type { ITaskAssignFullInfo } from '$lib/models/ITaskAssignFullInfo';
 import { TaskAssignStatus, type ITaskAssign } from '$lib/models/ITaskAssign';
 import type { ITaskModel } from '$lib/models/ITaskModel';
 import { isValidObjectId } from 'mongoose';
@@ -27,7 +27,7 @@ export class TaskAssignRepository extends Repository<ITaskAssign> {
   @ensureConnected
   async getBySpecialistEmail(email: string, onlyActive: boolean): Promise<ITaskAssignFullInfo[]> {
     var specialistRepo = new SpecialistsRepository();
-  
+
     var specialist = await specialistRepo.getByEmail(email);
 
     let specialistId = specialist?.id ?? '';
@@ -37,7 +37,7 @@ export class TaskAssignRepository extends Repository<ITaskAssign> {
       status: { $in: this.getAvailableStatuses(onlyActive) }
     });
 
-    return await this.mapToFyllInfo(tasks)
+    return await this.mapToFyllInfo(tasks);
   }
 
   @ensureConnected
@@ -46,39 +46,38 @@ export class TaskAssignRepository extends Repository<ITaskAssign> {
       status: { $in: this.getAvailableStatuses(onlyActive) }
     });
 
-    return await this.mapToFyllInfo(tasks)
+    return await this.mapToFyllInfo(tasks);
   }
 
-
-  async mapToFyllInfo(tasks: any[]): Promise<ITaskAssignFullInfo[]>{
-    let result: ITaskAssignFullInfo[] = []
+  async mapToFyllInfo(tasks: any[]): Promise<ITaskAssignFullInfo[]> {
+    let result: ITaskAssignFullInfo[] = [];
 
     const branchRepo = new Repository<IBranchModel>('branch', BranchSchema);
     const taskRepo = new Repository<ITaskModel>('tasks', TaskScheme);
 
-    for(let i=0;i<tasks.length;i++){
+    for (let i = 0; i < tasks.length; i++) {
+      let assignTask = tasks[i];
 
-        let assignTask = tasks[i];
+      let branch = await branchRepo.get(assignTask.branchId);
+      let task = await taskRepo.get(assignTask.taskId);
 
-        let branch = await branchRepo.get(assignTask.branchId)
-        let task = await taskRepo.get(assignTask.taskId)
-
-        result.push({
-          id: String(assignTask._id),
-          task: {
-            id: task?.id,
-            name: task?.name,
-          },
-          branch: {
-            id: branch?.id,
-            address: branch?.address?.address,
-            latitude: branch?.address?.latitude,
-            longitude: branch?.address?.longitude
-          },
-          taskNum: assignTask.taskNumber,
-          created: assignTask.date,
-          priority: assignTask.priority,
-          status: assignTask.status})
+      result.push({
+        id: String(assignTask._id),
+        task: {
+          id: task?.id,
+          name: task?.name
+        },
+        branch: {
+          id: branch?.id,
+          address: branch?.address?.address,
+          latitude: branch?.address?.latitude,
+          longitude: branch?.address?.longitude
+        },
+        taskNum: assignTask.taskNumber,
+        created: assignTask.date,
+        priority: assignTask.priority,
+        status: assignTask.status
+      });
     }
 
     return result;
@@ -86,9 +85,9 @@ export class TaskAssignRepository extends Repository<ITaskAssign> {
 
   @ensureConnected
   async updateStatus(id: string, status: TaskAssignStatus): Promise<ITaskAssign | null> {
-    console.log(id)
+    console.log(id);
     let currentEntity = await this.model.findById(id);
-    console.log(currentEntity)
+    console.log(currentEntity);
 
     if (currentEntity != null) {
       currentEntity.status = status;
@@ -162,10 +161,7 @@ export class TaskAssignRepository extends Repository<ITaskAssign> {
     let availableTaskStatuses: TaskAssignStatus[];
 
     if (onlyActive) {
-      availableTaskStatuses = [
-        TaskAssignStatus.Todo,
-        TaskAssignStatus.InWork
-      ];
+      availableTaskStatuses = [TaskAssignStatus.Todo, TaskAssignStatus.InWork];
     } else {
       availableTaskStatuses = [
         TaskAssignStatus.Todo,

@@ -12,7 +12,7 @@ import type { IResponse } from '$lib/models/IResponse';
 import type { IUpdateTaskAssignStatusModel } from '$lib/models/IUpdateTaskAssignStatusModel';
 import type { ITaskAssignFullInfo } from '$lib/models/ITaskAssignFullInfo';
 
-var taskAssignRepo = new TaskAssignRepository('task-assign', TaskAssignScheme);
+const taskAssignRepo = new TaskAssignRepository('task-assign', TaskAssignScheme);
 class TaskAssignRPC implements ITaskAssignRPC {
   @rpc()
   async create(taskAssign: ITaskAssign): Promise<IResponse<ITaskAssign>> {
@@ -71,18 +71,17 @@ class TaskAssignRPC implements ITaskAssignRPC {
 
   @rpc()
   async delete(id: string): Promise<void> {
-    await repo.delete(id);
+    await taskAssignRepo.delete(id);
   }
 }
 
-const composer = new Composer([TaskAssignRPC], { route: '/taskAssigns' });
+export const composer = new Composer([TaskAssignRPC], { route: '/taskAssigns' });
 composer.use(sveltekit());
+
 export async function POST(event) {
-  debugger;
   return json(await composer.exec(event));
 }
 
 export async function GET() {
-  debugger;
   return json(composer.getSchema());
 }

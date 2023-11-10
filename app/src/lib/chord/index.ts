@@ -10,7 +10,7 @@ import type {
   MethodMetadata,
   Call,
   PropKey,
-  ClassConstructor,
+  ClassConstructor
 } from './types';
 
 import axios from 'axios';
@@ -41,9 +41,9 @@ export class Composer {
   }
 
   static addProp({ key, target }) {
-    const targetName = `${target.constructor.name}`
-    const oldProps = Composer.props.get(targetName) ?? []
-    Composer.props.set(targetName, oldProps.concat({ key, target }))
+    const targetName = `${target.constructor.name}`;
+    const oldProps = Composer.props.get(targetName) ?? [];
+    Composer.props.set(targetName, oldProps.concat({ key, target }));
   }
 
   static findRequest(event: unknown) {
@@ -56,7 +56,7 @@ export class Composer {
   }
 
   // static resolve(injectable: object, key: PropKey) {
-  // 
+  //
   // }
 
   use(middleware: CallableFunction) {
@@ -123,15 +123,15 @@ export class Composer {
     const { target, descriptor } = methodDesc as MethodDescription;
 
     // Inject ctx dependency
-    const ctxProp = Composer.props.get(target.constructor.name)?.find(d => d.key === 'ctx')
+    const ctxProp = Composer.props.get(target.constructor.name)?.find((d) => d.key === 'ctx');
     if (ctxProp) {
       Reflect.defineProperty(target, ctxProp.key, {
         configurable: false,
         enumerable: false,
         get() {
-          return ctx
+          return ctx;
         }
-      })
+      });
     }
     return await descriptor.value.apply(target, args.concat(ctx));
   }
@@ -160,33 +160,36 @@ export function depends() {
   return function (target: object, key: PropKey) {
     // const injectable = Reflect.getMetadata("design:type", target, key) as ClassConstructor<object>;
     Composer.addProp({
-      key, target
-    })
+      key,
+      target
+    });
 
     // If dependency is context, inject it during exec call
-    if (key === 'ctx') return
+    if (key === 'ctx') return;
 
     Reflect.defineProperty(target, key, {
       configurable: false,
       enumerable: false,
       get() {
-        return "hello world"
+        return 'hello world';
       }
-    })
-  }
+    });
+  };
 }
 
 export function initClient<T>(schema: Schema): T {
   function call(method: string) {
     return async (...args: unknown[]) => {
       return (await axios.post(schema.route, { args, method } as Call)).data;
-    }
+    };
   }
 
   const handler: Record<string, string | ((args: unknown[]) => Promise<any>)> = {};
 
   for (const model of schema.models) {
-    const modelMethods = Object.entries(schema.methods).filter(([k, v]) => k.split('/')[0] === model);
+    const modelMethods = Object.entries(schema.methods).filter(
+      ([k, v]) => k.split('/')[0] === model
+    );
     const renamed = Object.fromEntries(
       // Remove Model name from key and place callable
       modelMethods.map(([k, v]) => {
