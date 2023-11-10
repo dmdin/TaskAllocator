@@ -6,6 +6,7 @@ import sveltekit from '$lib/chord/middlewares/sveltekit';
 import type { IBranchRPC, IPagingParams } from './types';
 import { Repository } from '$lib/repositories/Repository';
 import { BranchSchema } from '$lib/repositories/mongoSchemes';
+import type { IValidationResult } from '$lib/repositories/IValidationResult';
 
 const repo = new Repository<IBranchModel>('branch', BranchSchema);
 export class BranchRPC implements IBranchRPC {
@@ -26,7 +27,11 @@ export class BranchRPC implements IBranchRPC {
 
   @rpc()
   async update(branch: IBranchModel): Promise<IBranchModel | null> {
-    let result: IBranchModel | null = null;
+    let result: IResponse<IBranchModel> = {
+      validation: { valid: true } as IValidationResult,
+      entity: null
+    };
+
     if (branch.id != null) {
       result = await repo.update(branch.id, branch);
     }

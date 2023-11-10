@@ -16,6 +16,7 @@ export const BranchSchema = new mongoose.Schema({
     lastCardIssuanceDays: { type: Number, required: true },
     approvedIssuesNumber: { type: Number, required: true },
     issuanceCardCount: { type: Number, required: true },
+    is_office: { type: Boolean, required: true }
   });
 
  
