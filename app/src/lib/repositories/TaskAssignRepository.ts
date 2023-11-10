@@ -37,7 +37,7 @@ export class TaskAssignRepository extends Repository<ITaskAssign> {
       status: { $in: this.getAvailableStatuses(onlyActive) }
     });
 
-    return await this.mapToFyllInfo(tasks)
+    return await this.mapToFyllInfo(tasks, specialist)
   }
 
   @ensureConnected
@@ -46,15 +46,16 @@ export class TaskAssignRepository extends Repository<ITaskAssign> {
       status: { $in: this.getAvailableStatuses(onlyActive) }
     });
 
-    return await this.mapToFyllInfo(tasks)
+    return await this.mapToFyllInfo(tasks, null)
   }
 
 
-  async mapToFyllInfo(tasks: any[]): Promise<ITaskAssignFullInfo[]>{
+  async mapToFyllInfo(tasks: any[], specialist: ISpecialistModel | null): Promise<ITaskAssignFullInfo[]>{
     let result: ITaskAssignFullInfo[] = []
 
     const branchRepo = new Repository<IBranchModel>('branch', BranchSchema);
     const taskRepo = new Repository<ITaskModel>('tasks', TaskScheme);
+    const specRepo = new Repository<ISpecialistModel>("specialists", SpecialistSchema);
 
     for(let i=0;i<tasks.length;i++){
 
@@ -62,6 +63,10 @@ export class TaskAssignRepository extends Repository<ITaskAssign> {
 
         let branch = await branchRepo.get(assignTask.branchId)
         let task = await taskRepo.get(assignTask.taskId)
+
+        if (specialist == null){
+          specialist = await specRepo.get(assignTask.specialistId);
+        }
 
         result.push({
           id: String(assignTask._id),
@@ -74,6 +79,15 @@ export class TaskAssignRepository extends Repository<ITaskAssign> {
             address: branch?.address?.address,
             latitude: branch?.address?.latitude,
             longitude: branch?.address?.longitude
+          },
+          specialist:{
+            id: specialist?.id,
+            firstName: specialist?.firstName,
+            lastName: specialist?.lastName,
+            fatherName: specialist?.fatherName,
+            office: specialist?.address,
+            email: specialist?.email,
+            level: specialist?.level
           },
           taskNum: assignTask.taskNumber,
           created: assignTask.date,
