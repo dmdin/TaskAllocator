@@ -73,7 +73,7 @@
           <Icon icon="ph:moon-fill" />
         {/if}
       </button>
-      <button class="btn btn-sm mr-2"><Icon icon="mingcute:exit-line" />Выйти</button>
+      <a href="/login" class="btn btn-sm mr-2"><Icon icon="mingcute:exit-line" />Войти</a>
     </div>
   </header>
 

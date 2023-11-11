@@ -134,9 +134,9 @@
 <div class="m-auto w-full xl:w-3/4 h-full flex flex-col items-center">
   <div class="flex w-full justify-between items-center px-3">
     <h2 class="font-bold text-2xl">Задачи</h2>
-    <button on:click={startCreating} class="my-2 self-end btn btn-primary !font-bold">
+    <!-- <button on:click={startCreating} class="my-2 self-end btn btn-primary !font-bold">
       <Icon icon="ph:user" width="20" /> Создать</button
-    >
+    > -->
   </div>
   <div class="w-full overflow-x-auto">
     <table class="table table-xs md:table-md table-pin-rows table-pin-cols border-1">
@@ -157,8 +157,8 @@
           {@const fio = task.specialist ? `${task.specialist?.lastName} ${task.specialist?.firstName} ${task.specialist.fatherName}`:'-'}
           <tr
             class="cursor-pointer transition-color hover:bg-base-200"
-            on:click={() => startEditing(i)}
           >
+          <!-- on:click={() => startEditing(i)} -->
             <!-- <tr class="cursor-pointer transition-color hover:bg-base-200" on:click={() => showModal = true}> -->
             <th>{i + 1}</th>
             <td>{task.task.name}</td>
