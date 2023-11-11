@@ -13,7 +13,7 @@ import type { IUpdateTaskAssignStatusModel } from '$lib/models/IUpdateTaskAssign
 import type { ITaskAssignFullInfo } from '$lib/models/ITaskAssignFullInfo';
 
 const taskAssignRepo = new TaskAssignRepository('task-assign', TaskAssignScheme);
-class TaskAssignRPC implements ITaskAssignRPC {
+export class TaskAssignRPC implements ITaskAssignRPC {
   @rpc()
   async create(taskAssign: ITaskAssign): Promise<IResponse<ITaskAssign>> {
     let validationResult = await taskAssignRepo.validateTaskAssign(taskAssign);
@@ -58,6 +58,7 @@ class TaskAssignRPC implements ITaskAssignRPC {
 
   @rpc()
   async getForManager(onlyActive: boolean): Promise<ITaskAssignFullInfo[]> {
+    console.log(await taskAssignRepo.getForManager(onlyActive))
     return await taskAssignRepo.getForManager(onlyActive);
   }
 
