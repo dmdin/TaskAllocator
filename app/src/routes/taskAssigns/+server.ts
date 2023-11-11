@@ -11,6 +11,7 @@ import type { IValidationResult } from '$lib/repositories/IValidationResult';
 import type { IResponse } from '$lib/models/IResponse';
 import type { IUpdateTaskAssignStatusModel } from '$lib/models/IUpdateTaskAssignStatusModel';
 import type { ITaskAssignFullInfo } from '$lib/models/ITaskAssignFullInfo';
+import { SpecialistRPC } from '../specialists/+server';
 
 const taskAssignRepo = new TaskAssignRepository('task-assign', TaskAssignScheme);
 export class TaskAssignRPC implements ITaskAssignRPC {
@@ -77,7 +78,7 @@ export class TaskAssignRPC implements ITaskAssignRPC {
   }
 }
 
-export const composer = new Composer([TaskAssignRPC], { route: '/taskAssigns' });
+export const composer = new Composer([TaskAssignRPC, SpecialistRPC], { route: '/taskAssigns' });
 composer.use(sveltekit());
 
 export async function POST(event) {

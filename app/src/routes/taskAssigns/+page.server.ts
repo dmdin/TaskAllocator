@@ -1,5 +1,8 @@
+import { fltMongo } from '$lib/utils';
 import { composer } from './+server';
 
 export async function load() {
-  return { schema: composer.getSchema() };
+  const tasks = await composer.TaskAssignRPC.getBySpecialistEmail({ email: 'bobip@yandex.ru', onlyActive: false }).then(r => fltMongo(r))
+  const employees = await composer.SpecialistRPC.getAll({offset: 0, limit: 100}).then(r => fltMongo(r))
+  return { schema: composer.getSchema(), tasks,employees };
 }

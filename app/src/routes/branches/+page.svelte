@@ -9,14 +9,11 @@
   import Map from './Map.svelte';
 
   export let data;
-  const { schema } = data;
+  let { schema, branches } = data;
   const rpc = initClient<Wrapped>(schema);
 
   onMount(async () => {
-    branches = await rpc.BranchRPC.getAll({ count: 100, offset: 0 });
   });
-
-  let branches: IBranchModel[] = [];
 
   let editingIndex = 0;
 
