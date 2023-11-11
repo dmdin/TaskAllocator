@@ -7,16 +7,10 @@
   import Modal from '$lib/ui/Modal.svelte';
 
   export let data;
-  const { schema } = data;
+  let { schema, employees, branches } = data;
 
+  const mappedBranches = Object.fromEntries(branches.map(b => [b.id, b]))
   const rpc = initClient<Wrapped>(schema);
-  onMount(async () => {
-    employees = await rpc.SpecialistRPC.getAll({ count: 100, offset: 0 });
-    branches = await rpc.BranchRPC.getAll({ count: 100, offset: 0 });
-  });
-
-  let employees = [];
-  let branches = [];
   const grades = ['Jun 🐣', 'Mid 🧑‍💻', ' Sen 🧙‍♂️'];
 
   let editingIndex = 0;
@@ -159,7 +153,7 @@
           >
             <!-- <tr class="cursor-pointer transition-color hover:bg-base-200" on:click={() => showModal = true}> -->
             <th>{i + 1}</th>
-            <td>{address}</td>
+            <td>{mappedBranches[address].address.address}</td>
             <td>{email}</td>
             <td>{firstName}</td>
             <td>{lastName}</td>
