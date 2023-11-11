@@ -1,3 +1,4 @@
+import type { ISpecialistModel } from './ISpecialistModel';
 import type { TaskAssignStatus } from './ITaskAssign';
 import type { TaskPriority } from './ITaskModel';
 
@@ -17,6 +18,7 @@ export interface ITaskAssignFullInfo {
   id: string | undefined | undefined;
   task: ITaskInfo | undefined;
   branch: IOfficeInfo | undefined;
+  specialist: ISpecialistModel | null,
   taskNum: number | null;
   created: Date | null;
   priority: TaskPriority | null;

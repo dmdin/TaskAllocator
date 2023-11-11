@@ -54,12 +54,14 @@ export class TaskAssignRepository extends Repository<ITaskAssign> {
 
     const branchRepo = new Repository<IBranchModel>('branch', BranchSchema);
     const taskRepo = new Repository<ITaskModel>('tasks', TaskScheme);
+    const specialistRepo = new Repository<ISpecialistModel>('specialist', SpecialistSchema);
 
     for (let i = 0; i < tasks.length; i++) {
       let assignTask = tasks[i];
 
       let branch = await branchRepo.get(assignTask.branchId);
       let task = await taskRepo.get(assignTask.taskId);
+      let specialist = await specialistRepo.get(assignTask.specialistId)
 
       result.push({
         id: String(assignTask._id),
@@ -76,7 +78,8 @@ export class TaskAssignRepository extends Repository<ITaskAssign> {
         taskNum: assignTask.taskNumber,
         created: assignTask.date,
         priority: assignTask.priority,
-        status: assignTask.status
+        status: assignTask.status,
+        specialist: specialist
       });
     }
 
