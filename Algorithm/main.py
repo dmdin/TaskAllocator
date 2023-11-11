@@ -8,6 +8,7 @@ from bson.objectid import ObjectId
 from models.AssignTask import TaskAssignStatus
 import pandas as pd
 from get_time import MatrixWithMinutes
+from itertools import permutations
 import uvicorn
 import schedule
 from fastapi import FastAPI
@@ -38,7 +39,7 @@ def isNeedTask1(branch: Branch):
 1. Отношение кол-ва выданных карт к одобренным заявкам менее 50%, если выдано больше 0 карт
 '''
 def isNeedTask2(branch: Branch):
-    return branch.issuanceCardCount > 0 and (1.0 * branch.approvedIssuesNumber / max(1, branch.issuanceCardCount)) < 0.5
+    return branch.approvedIssuesNumber > 0 and branch.issuanceCardCount > 0 and (1.0 * branch.issuanceCardCount / branch.approvedIssuesNumber < 0.5)
 
 
 '''
@@ -71,6 +72,9 @@ def get_sub_workers(point_id, workers_df, time_df, grade, ttime):
     sub_workers = sub_workers[sub_workers.diff_time >= 0]
     return sub_workers
 
+def get_times(id1, id2, time_df):
+    return time_df[(time_df.id1 == id1) & (time_df.id2 == id2)]["t"].values[0]
+
 def job():
 
     WORK_HOURS_PER_DAY = 8
@@ -78,24 +82,29 @@ def job():
 
     #Доставка карт и материалов
     task1Id = '654aa25628fd5a4d65e9e583'
+    #1.5 час
 
     #Обучение агента
     task2Id = '654aa20a28fd5a4d65e9e581'
+    #2 часа
 
     #Выезд на точку для стимулирования выдач
     task3Id = '654aa1e128fd5a4d65e9e57e'
+    # 4 часа
 
     repo = MongoRepository()
     branches = repo.getAllBranches()
     tasksToDo = repo.getAllActiveAssignedTasks()
 
+
     for ttd in tasksToDo:
         ttd.specialistId = None
         ttd.priority = TaskPriority.High
 
+
     workers = repo.getAllSpecialists()
 
-    workers_df = pd.DataFrame([{'worker_id':t.id, 'base_id':t.address, 'grade': int(t.level.value)+1} for t in workers])
+    workers_df = pd.DataFrame([{'worker_id':t.id, 'base_id':t.address, 'current_id': t.address, 'grade': int(t.level.value)+1} for t in workers])
     workers_df["work_time"] = [WORK_HOURS_PER_DAY * MINUTES_IN_HOUR] * workers_df.shape[0]
     
 
@@ -117,15 +126,10 @@ def job():
         elif isNeedTask3(branch):
             assignedTask.taskId = task3Id
             assignedTask.priority = TaskPriority.High
-
         if assignedTask.taskId is not None and not is_task_exists(tasksToDo, assignedTask):
             tasksToDo.append(assignedTask)
 
     tasksToDo = sort_tasks(tasksToDo)
-
-    for i in tasksToDo:
-        i.specialistId = None
-
 
     tasks_df = pd.DataFrame([{'id': t.id, 'point_id':t.branchId, 'prior': int(t.priority.value), 'task': t.taskId, 'dates': t.date} for t in tasksToDo])
 
@@ -140,9 +144,6 @@ def job():
             time_df.append({'id1': loc, 'id2': loc2, 't': matr.matrix[loc][loc2]})
 
     time_df = pd.DataFrame(time_df)
-    
-
-    worker_counts = {}
 
     cur_p = 2
     while cur_p != -1:
@@ -165,6 +166,7 @@ def job():
                 if len(sub_workers) == 0:
                     continue
                 worker = sub_workers.iloc[0].worker_id
+                assignTask = sub_tasks.iloc[i].id
                 point = sub_tasks.iloc[i].point_id
                 dt = sub_workers.iloc[0].diff_time
 
@@ -172,10 +174,11 @@ def job():
                 ttime = 2
                 sub_workers = get_sub_workers(sub_tasks.iloc[i].point_id, workers_df, time_df, 2, ttime)
                 if len(sub_workers) == 0:
-                    sub_workers = get_sub_workers(sub_tasks.iloc[i].point_id, workers_df, time_df, 3, ttime)
+                    sub_workers = get_sub_workers(sub_tasks.iloc[i].point_id, workers_df, time_df,3, ttime)
                     if len(sub_workers) == 0:
                         continue
                 worker = sub_workers.iloc[0].worker_id
+                assignTask = sub_tasks.iloc[i].id
                 point = sub_tasks.iloc[i].point_id
                 dt = sub_workers.iloc[0].diff_time
 
@@ -190,10 +193,12 @@ def job():
                             continue
                 worker = sub_workers.iloc[0].worker_id
                 assignTask = sub_tasks.iloc[i].id
+                print(assignTask)
                 point = sub_tasks.iloc[i].point_id
                 dt = sub_workers.iloc[0].diff_time
 
             if worker is not None:
+                print(worker)
                 if worker not in workers_task:
                     workers_task[worker] = [assignTask]
                 else:
@@ -211,16 +216,41 @@ def job():
         if not is_smth_changed:
             cur_p -= 1
 
-
-    result_tasks = []
+    tasks_by_spec = {}
 
     for t in tasksToDo:
-        if(t.specialistId is not None):
-            result_tasks.append(t)
-            
-    repo.updateOrCreateAssignedTasks(result_tasks)
+        if t.specialistId is not None:
+            if t.specialistId not in tasks_by_spec:
+                tasks_by_spec[t.specialistId] = [t.branchId]
+            else:
+                tasks_by_spec[t.specialistId].append(t.branchId)
+
+    tasks_by_spec_optim = {}
+    for s in tasks_by_spec:
+        ts = tasks_by_spec[s]
+        base_id = workers_df[workers_df.worker_id == s].current_id.values[0]
+        perm = list(permutations(ts))  # получаем все перестановки маршрута
+        t = [get_times(base_id, p[0], time_df) + sum([get_times(p[j], p[j + 1], time_df) for j in range(len(p) - 1)])
+             for
+             p in perm]  # cчитаем время для каждой перестановки
+        ts_optim = perm[t.index(min(t))]  # выбираем минимальное по времени
+
+        tasks_by_spec_optim[s] = ts_optim
+
+    tid2sid = {}
+    for sid in tasks_by_spec_optim:
+        for tid in tasks_by_spec_optim:
+            tid2sid[tid] = sid
+
+    for taskTodo in tasksToDo:
+        if taskTodo.id in tid2sid:
+            taskTodo.specialistId = tid2sid[taskTodo.id]
+            taskTodo.taskNumber = len(tasks_by_spec_optim[tid2sid[taskTodo.id]])
+
+    repo.updateOrCreateAssignedTasks(tasksToDo)
 
 app = FastAPI()
+
 
 
 @ app.get("/force-allocate-tasks")
@@ -244,3 +274,5 @@ if __name__ == "__main__":
     with ThreadPoolExecutor(max_workers=2) as executor:
         executor.submit(run_fastapi)
         executor.submit(run_schedule)
+
+job()
