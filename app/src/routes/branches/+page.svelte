@@ -1,6 +1,5 @@
 <script lang="ts">
   import { initClient } from '$lib/chord';
-  import axios from 'axios';
   import { onMount } from 'svelte';
   import type { IBranchRPC, Wrapped } from './types';
   import Modal from '$lib/ui/Modal.svelte';
@@ -11,7 +10,7 @@
 
   export let data;
   const { schema } = data;
-  const rpc = initClient<BranchRPC>(schema);
+  const rpc = initClient<Wrapped>(schema);
 
   onMount(async () => {
     // console.log(await rpc.TestRPC.dbReq(123))
@@ -19,7 +18,7 @@
     //   console.log(await rpc.dbReq(123))
     //   console.log(await rpc.dbReq2('world'))
     console.log(rpc);
-    branches = await rpc.getAll({ count: 100, offset: 0 });
+    branches = await rpc.BranchRPC.getAll({ count: 100, offset: 0 });
     console.log(branches);
   });
 
@@ -28,7 +27,7 @@
   let editingIndex = 0;
 
   let branchTemplate = {
-    id: '',
+    id: undefined,
     address: {
       latitude: 123,
       longitude: 321,
@@ -44,16 +43,17 @@
   let editing = { ...branchTemplate };
 
   async function saveEdited() {
-    let entity, validation;
+    let updated ;
     console.log(editing);
     if (editing.id) {
-      ({ entity, validation } = await rpc.BranchRPC.update(editing));
-      branches[editingIndex] = entity;
+      updated = await rpc.BranchRPC.update(editing);
+      console.log(updated)
+      branches[editingIndex] = updated;
     } else {
-      ({ entity, validation } = await rpc.BranchRPC.create(editing));
-      branches = branches.concat(entity);
+      updated = await rpc.BranchRPC.create(editing);
+      console.log(updated)
+      branches = branches.concat(updated);
     }
-    console.log("saveEdited",validation)
   }
 
   function startEditing(index) {

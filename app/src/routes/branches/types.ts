@@ -10,5 +10,6 @@ export interface IBranchRPC {
   // getBranch(id: number): IBranch
 }
 
+
 export type Wrapped = { BranchRPC: IBranchRPC; };
 export interface Unwrapped extends IBranchRPC {}

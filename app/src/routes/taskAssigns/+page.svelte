@@ -53,8 +53,8 @@
             <span class="font-bold">{task.task.name}</span>
             <span class="font-bold rounded-xl px-3 py-1 {pColors}">{pTitle}</span>  
           </div>
-          <div class="flex mt-1 gap-1">
-            <span>Статус:</span>
+          <div class="flex mt-1 gap-1 items-continer">
+            <span class="mt-1">Статус:</span>
             <span class="font-bold rounded-xl px-3 py-1 {sColors}">{sTitle}</span>
           </div>
         </div>
