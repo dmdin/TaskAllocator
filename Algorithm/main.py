@@ -38,7 +38,7 @@ def isNeedTask1(branch: Branch):
 1. Отношение кол-ва выданных карт к одобренным заявкам менее 50%, если выдано больше 0 карт
 '''
 def isNeedTask2(branch: Branch):
-    return branch.issuanceCardCount > 0 and (1.0 * branch.approvedIssuesNumber / branch.issuanceCardCount) < 0.5
+    return branch.issuanceCardCount > 0 and (1.0 * branch.approvedIssuesNumber / max(1, branch.issuanceCardCount)) < 0.5
 
 
 '''
