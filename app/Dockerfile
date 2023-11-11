@@ -7,7 +7,6 @@ RUN corepack enable
 WORKDIR /app
 COPY . .
 
-RUN rm -r /app/node_modules
 
 FROM base as prod-deps
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile

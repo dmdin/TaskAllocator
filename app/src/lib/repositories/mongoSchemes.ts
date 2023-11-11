@@ -9,14 +9,15 @@ export const AddressScheme = new mongoose.Schema({
 });
 
 export const BranchSchema = new mongoose.Schema({
-  id: { type: mongoose.Schema.ObjectId, required: false },
-  address: { type: AddressScheme, required: true },
-  connectionDate: { type: Number, required: true },
-  cardMaterialsDelivered: { type: Number, required: true },
-  lastCardIssuanceDays: { type: Number, required: true },
-  approvedIssuesNumber: { type: Number, required: true },
-  issuanceCardCount: { type: Number, required: true }
-});
+    id: { type: mongoose.Schema.ObjectId, required: false},
+    address:{ type: AddressScheme, required: true },
+    connectionDate: {type: Number, required: true},
+    cardMaterialsDelivered: { type: Number, required: true },
+    lastCardIssuanceDays: { type: Number, required: true },
+    approvedIssuesNumber: { type: Number, required: true },
+    issuanceCardCount: { type: Number, required: true },
+    is_office: { type: Boolean, required: true }
+  });
 
 export const SpecialistSchema = new mongoose.Schema({
   id: { type: mongoose.Schema.ObjectId, required: false },
