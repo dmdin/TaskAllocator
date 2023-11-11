@@ -10,7 +10,7 @@
 ## ✍️ Оглавнение
 
 - [🐳 Запуск с помощью докера](https://github.com/Dikower/SceneDescriptor/edit/master/readme.md#-запуск-с-помощью-докера)
-- 📎 Презентация [![Download zip](https://custom-icon-badges.herokuapp.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download zip")](https://github.com/Dikower/SceneDescriptor/files/11102333/Finch.Peach.pdf)
+- 📎 Презентация [![Download zip](https://custom-icon-badges.herokuapp.com/badge/-Download-blue?style=for-the-badge&logo=download&logoColor=white "Download zip")](https://github.com/Dikower/TaskAllocator/blob/master/files/Presentation.pdf)
 
 ## 🐳 Запуск с помощью докера
 
