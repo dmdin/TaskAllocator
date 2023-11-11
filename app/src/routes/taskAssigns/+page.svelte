@@ -23,6 +23,7 @@
 
     console.log('tasks', tasks);
   });
+
 </script>
 
 <div class="h-full w-full flex flex-col items-center">
@@ -53,9 +54,13 @@
             <span class="font-bold">{task.task.name}</span>
             <span class="font-bold rounded-xl px-3 py-1 {pColors}">{pTitle}</span>  
           </div>
-          <div class="flex mt-1 gap-1">
+          <div class="flex mt-1 gap-2 items-center">
             <span>Статус:</span>
-            <span class="font-bold rounded-xl px-3 py-1 {sColors}">{sTitle}</span>
+            <select class="font-bold rounded-xl px-3 py-1 {sColors}">
+              {#each Object.values(taskStatus) as status}
+                <option value={status.title}>{status.title}</option>
+              {/each}
+            </select>
           </div>
         </div>
       {/each}
