@@ -35,7 +35,4 @@ export interface Target {
 }
 
 export type PropKey = string | symbol;
-
-export type ComposerModels = unknown[] | Record<string, unknown>;
-
 export type ClassConstructor<T extends object> = new (...params: any) => T;

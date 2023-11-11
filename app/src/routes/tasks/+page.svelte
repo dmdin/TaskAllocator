@@ -1,8 +1,8 @@
 <script lang="ts">
   import { initClient } from '$lib/chord';
   import Icon from '@iconify/svelte';
-  import * as dayjs from 'dayjs';
-  import { onMount } from 'svelte';
+  import dayjs from 'dayjs'
+    import { onMount } from 'svelte';
   import type { Wrapped } from './types';
   import Modal from '$lib/ui/Modal.svelte';
 

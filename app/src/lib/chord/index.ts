@@ -17,12 +17,12 @@ import axios from 'axios';
 import c from 'chalk';
 
 // TODO think to make constructor instead
-export class Composer {
+export class Composer<T>{
   config?: ComposerConfig;
   models: ComposerModels;
   middlewares: CallableFunction[];
 
-  constructor(models: ComposerModels, config?: ComposerConfig) {
+  constructor(models: T[], config?: ComposerConfig) {
     this.config = config;
     // List is unwrapped client and Records<string, Target> are wrapped
     this.models = models;

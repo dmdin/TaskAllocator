@@ -44,10 +44,10 @@
           tabindex="0"
           class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
         >
-          <li><a href="/specialists">Сотрудники</a></li>
-          <li><a href="/tasks">Задачи</a></li>
-          <li><a href="/branches">Офисы</a></li>
-          <li><a href="/taskAssigns">Текущие задачи</a></li>
+          <li><a data-sveltekit-preload-data="hover" href="/specialists">Сотрудники</a></li>
+          <li><a data-sveltekit-preload-data="hover" href="/tasks">Задачи</a></li>
+          <li><a data-sveltekit-preload-data="hover" href="/branches">Офисы</a></li>
+          <li><a data-sveltekit-preload-data="hover" href="/taskAssigns">Текущие задачи</a></li>
         </ul>
       </div>
       <a class="btn-ghost w-auto normal-case text-xl">
@@ -56,10 +56,10 @@
     </div>
     <div class="navbar-center hidden lg:flex">
       <ul class="menu menu-horizontal px-1">
-        <li><a href="/specialists">Сотрудники</a></li>
-        <li><a href="/tasks">Задачи</a></li>
-        <li><a href="/branches">Офисы</a></li>
-        <li><a href="/taskAssigns">Текущие задачи</a></li>
+        <li><a data-sveltekit-preload-data="hover" href="/specialists">Сотрудники</a></li>
+        <li><a data-sveltekit-preload-data="hover" href="/tasks">Задачи</a></li>
+        <li><a data-sveltekit-preload-data="hover" href="/branches">Офисы</a></li>
+        <li><a data-sveltekit-preload-data="hover" href="/taskAssigns">Текущие задачи</a></li>
       </ul>
     </div>
     <div class="navbar-end">
