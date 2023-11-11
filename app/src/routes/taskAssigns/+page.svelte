@@ -10,31 +10,38 @@
   import * as dayjs from 'dayjs';
 
   import { taskPriority, taskStatus } from '$lib/contants';
+    import type { Wrapped } from './types';
   export let data;
   const { schema } = data;
 
-  const rpc = initClient<ITaskAssignRPC>(schema);
+  const rpc = initClient<Wrapped>(schema);
   let tasks = [];
   let loaded = false;
+
+  async function updateStatus(i) {
+    const {status,id} = tasks[i]
+    const res = await rpc.TaskAssignRPC.updateStatus({newStatus: status, id})
+  }
+
   onMount(async () => {
     tasks = await rpc.getBySpecialistEmail({ email: 'd@d', onlyActive: false });
+
     loaded = true;
     // points = [];
 
     console.log('tasks', tasks);
   });
-
 </script>
 
 <div class="h-full w-full flex flex-col items-center">
-  <div class="w-full md:w-3/4 h-[400px]">
-    <Map />
+  <div class="w-full md:w-3/4 h-[400px] flex items-center justify-center">
+    <Map {tasks}/>
   </div>
-  <div class="flex flex-col mt-4 items-center w-full">
+  <div class="flex flex-col mt-4 px-4 items-center w-full">
     {#if !loaded}
       <Wave />
     {:else}
-      {#each tasks as task}
+      {#each tasks as task, i}
         {@const {title: pTitle, colors: pColors} = taskPriority[task.priority]}
         {@const {title: sTitle, colors: sColors} = taskStatus[task.status]}
 
@@ -51,14 +58,18 @@
           </div>
 
           <div class="flex mt-1 justify-between">
-            <span class="font-bold">{task.task.name}</span>
+            <span class="font-bold">{i+1}. {task.task.name}</span>
             <span class="font-bold rounded-xl px-3 py-1 {pColors}">{pTitle}</span>  
           </div>
           <div class="flex mt-1 gap-2 items-center">
             <span>Статус:</span>
-            <select class="font-bold rounded-xl px-3 py-1 {sColors}">
-              {#each Object.values(taskStatus) as status}
-                <option value={status.title}>{status.title}</option>
+            <select 
+              class="font-bold rounded-xl px-3 py-1 {sColors}" 
+              bind:value={tasks[i].status}
+              on:change={() => updateStatus(i)}
+            >
+              {#each Object.entries(taskStatus) as [index, status]}
+                <option value={index}>{status.title}</option>
               {/each}
             </select>
           </div>

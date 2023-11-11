@@ -4,18 +4,18 @@
   import { onMount } from 'svelte';
   import { Moon } from 'svelte-loading-spinners';
 
-  export let locations = [
-    {
-      latitude: 55.75361503443606,
-      longitude: 37.620883000000006,
-      name: 'Test point'
-    }
-  ];
-  export let center = [55.75361503443606, 37.620883000000006];
-  export let zoom = 17;
+  export let tasks = [];
+  export let center = [45.037165, 38.975636];
+  export let zoom = 10;  
 
   let map;
   let loaded = false;
+
+  const priorityPresets = {
+    "0": "islands#blueIcon",
+    "1": "islands#yellowIcon",
+    "2": "islands#redIcon",
+  }
 
   function loadMap() {
     let map = new ymaps.Map('map', {
@@ -24,12 +24,13 @@
     });
     // Создаем геообъект с типом геометрии "Точка".
     const points = map.geoObjects;
-    locations.forEach((location) => {
+    console.log(tasks)
+    tasks.forEach((task) => {
       points.add(
         new ymaps.Placemark(
-          [location.latitude, location.longitude],
-          { balloonContent: location.name },
-          {}
+          [task.branch.latitude, task.branch.longitude],
+          { balloonContentHeader: task.branch.address, balloonContentBody: task.task.name},
+          { preset: priorityPresets[task.priority]}
         )
       );
     });

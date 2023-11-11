@@ -51,7 +51,9 @@ class TaskAssignRPC implements ITaskAssignRPC {
 
   @rpc()
   async getBySpecialistEmail(params: IFindAssignedTaskByEmail): Promise<ITaskAssignFullInfo[]> {
-    return await taskAssignRepo.getBySpecialistEmail(params.email, params.onlyActive);
+    const tasks = await taskAssignRepo.getBySpecialistEmail(params.email, params.onlyActive)
+    tasks.sort((a, b) => a.taskNum - b.taskNum)
+    return tasks;
   }
 
   @rpc()

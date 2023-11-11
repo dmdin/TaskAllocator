@@ -23,7 +23,7 @@
 </script>
 
 <div class="w-full h-full" data-theme={$theme}>
-  <header class="navbar bg-base-100 fixed z-10 top-0">
+  <header class="navbar bg-base-100 sticky z-10 top-0">
     <div class="navbar-start">
       <div class="dropdown">
         <label tabindex="0" class="btn btn-ghost lg:hidden w-[70px]">
@@ -55,6 +55,7 @@
           </li>
           <li><a href="/tasks">Задачи</a></li>
           <li><a href="/taskAssigns">Текущие задачи</a></li>
+          <li><a href="/branches">Офисы</a></li>
         </ul>
       </div>
       <a class="btn-ghost w-auto normal-case text-xl">
@@ -75,6 +76,7 @@
         </li>
         <li><a href="/tasks">Задачи</a></li>
         <li><a href="/taskAssigns">Текущие задачи</a></li>
+        <li><a href="/branches">Офисы</a></li>
       </ul>
     </div>
     <div class="navbar-end">
@@ -92,7 +94,7 @@
     </div>
   </header>
 
-  <main class="w-full h-[90%] p-2 mt-[62px]">
+  <main class="w-full h-[90%] p-2 mt-[40px]">
     <slot />
   </main>
 </div>

@@ -85,17 +85,13 @@ export class TaskAssignRepository extends Repository<ITaskAssign> {
 
   @ensureConnected
   async updateStatus(id: string, status: TaskAssignStatus): Promise<ITaskAssign | null> {
-    console.log(id);
     let currentEntity = await this.model.findById(id);
-    console.log(currentEntity);
-
     if (currentEntity != null) {
       currentEntity.status = status;
       return ToModel<ITaskAssign>(
         await this.model.findByIdAndUpdate(id, currentEntity, { new: true })
       );
     }
-
     return null;
   }
 

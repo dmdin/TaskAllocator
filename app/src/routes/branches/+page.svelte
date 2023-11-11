@@ -44,7 +44,6 @@
 
   async function saveEdited() {
     let updated ;
-    console.log(editing);
     if (editing.id) {
       updated = await rpc.BranchRPC.update(editing);
       console.log(updated)
@@ -52,7 +51,7 @@
     } else {
       updated = await rpc.BranchRPC.create(editing);
       console.log(updated)
-      branches = branches.concat(updated);
+      branches = [updated, ...branches]
     }
   }
 
@@ -153,12 +152,15 @@
   </div>
 </Modal>
 
-<div class="m-auto w-3/4 h-full flex flex-col items-center justify-center">
+<div class="m-auto w-full xl:w-3/4 h-full flex flex-col items-center">
+  <div class="flex w-full justify-between items-center px-3">
+    <h2 class="font-bold text-2xl">Офисы</h2>
   <button on:click={startCreating} class="my-2 self-end btn btn-primary !font-bold">
      Создать</button
   >
+</div>
   <div class="w-full overflow-x-auto">
-    <table class="table table-md table-pin-rows table-pin-cols border-1">
+    <table class="table table-xs md:table-md table-pin-rows table-pin-cols border-1">
       <thead class="text-xs">
         <tr>
           <th class="max-w-[120px] truncate" title=""/>
