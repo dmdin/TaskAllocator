@@ -5,6 +5,8 @@
 
 <a href = "https://misis1.ru/"> Протестировать сайт </a>
 
+![Screenshot 2023-11-11 at 23-54-42 Screenshot](https://github.com/Dikower/TaskAllocator/assets/32881349/3f60e62b-cc3f-43f0-9fbb-36f076d5b4c8)
+
 ## ✍️ Оглавнение
 
 - [🐳 Запуск с помощью докера](https://github.com/Dikower/SceneDescriptor/edit/master/readme.md#-запуск-с-помощью-докера)
