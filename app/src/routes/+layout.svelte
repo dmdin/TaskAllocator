@@ -22,7 +22,7 @@
   });
 </script>
 
-<div class="w-full h-full" data-theme={$theme}>
+<div class="w-full h-full bg-base-100" data-theme={$theme}>
   <header class="navbar bg-base-100 sticky z-10 top-0">
     <div class="navbar-start">
       <div class="dropdown">
@@ -94,7 +94,7 @@
     </div>
   </header>
 
-  <main class="w-full h-[90%] p-2 mt-[40px]">
+  <main class="bg-base-100 w-full min-h-[90%] p-2 md:mt-[40px]">
     <slot />
   </main>
 </div>

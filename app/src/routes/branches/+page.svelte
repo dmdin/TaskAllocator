@@ -6,7 +6,7 @@
   import { ConnectionDate, type IBranchModel } from '$lib/models/IBranchModel';
   import type { BranchRPC } from './+server';
   import Icon from '@iconify/svelte';
-
+  import Map from './Map.svelte';
 
   export let data;
   const { schema } = data;
@@ -43,20 +43,20 @@
   let editing = { ...branchTemplate };
 
   async function saveEdited() {
-    let updated ;
+    let updated;
     if (editing.id) {
       updated = await rpc.BranchRPC.update(editing);
-      console.log(updated)
+      console.log(updated);
       branches[editingIndex] = updated;
     } else {
       updated = await rpc.BranchRPC.create(editing);
-      console.log(updated)
-      branches = [updated, ...branches]
+      console.log(updated);
+      branches = [updated, ...branches];
     }
   }
 
   function startEditing(index) {
-    console.log("startEditing", branches[index].cardMaterialsDelivered)
+    console.log('startEditing', branches[index].cardMaterialsDelivered);
     create_modal?.show();
     editingIndex = index;
     editing = branches[index];
@@ -70,7 +70,7 @@
 
   let deleteIndex;
   function deleteEmployee(index) {
-    console.log("deleteEmployee", index)
+    console.log('deleteEmployee', index);
     delete_modal?.show();
     deleteIndex = index;
   }
@@ -81,7 +81,6 @@
     branches = branches;
   }
 </script>
-
 
 <Modal id="delete_modal" title="Удаление пользователя">
   <h3 class="mt-4 text-xl font-bold text-center">Вы уверены?</h3>
@@ -109,13 +108,16 @@
       <option value={false}>Отделение</option>
       <option value={true}>Офис</option>
     </select>
-    
+
     <select class="select select-bordered w-full max-w-xs" bind:value={editing.connectionDate}>
       <option value={0}>Вчера</option>
       <option value={1}>Давно</option>
     </select>
 
-    <select class="select select-bordered w-full max-w-xs" bind:value={editing.cardMaterialsDelivered}>
+    <select
+      class="select select-bordered w-full max-w-xs"
+      bind:value={editing.cardMaterialsDelivered}
+    >
       <option value={0}>Нет</option>
       <option value={1}>Да</option>
     </select>
@@ -153,22 +155,29 @@
 </Modal>
 
 <div class="m-auto w-full xl:w-3/4 h-full flex flex-col items-center">
+  <div class="w-full h-[500px] flex justify-center">
+    <Map {branches}/>
+  </div>
   <div class="flex w-full justify-between items-center px-3">
     <h2 class="font-bold text-2xl">Офисы</h2>
-  <button on:click={startCreating} class="my-2 self-end btn btn-primary !font-bold">
-     Создать</button
-  >
-</div>
+    <button on:click={startCreating} class="my-2 self-end btn btn-primary !font-bold">
+      Создать</button
+    >
+  </div>
   <div class="w-full overflow-x-auto">
     <table class="table table-xs md:table-md table-pin-rows table-pin-cols border-1">
       <thead class="text-xs">
         <tr>
-          <th class="max-w-[120px] truncate" title=""/>
+          <th class="max-w-[120px] truncate" title="" />
           <td class="max-w-[120px] truncate" title="Адрес">Адрес</td>
           <td class="max-w-[120px] truncate" title="Тип">Тип</td>
           <td class="max-w-[120px] truncate" title="Дата подключения">Дата подключения</td>
-          <td class="max-w-[120px] truncate" title="Карты и материал имеются">Карты и материал имеются</td>
-          <td class="max-w-[120px] truncate" title="Дней с выдачи последней карты">Дней с выдачи последней карты</td>
+          <td class="max-w-[120px] truncate" title="Карты и материал имеются"
+            >Карты и материал имеются</td
+          >
+          <td class="max-w-[120px] truncate" title="Дней с выдачи последней карты"
+            >Дней с выдачи последней карты</td
+          >
           <th class="max-w-[120px] truncate" title="Одобренные заявки">Одобренные заявки</th>
           <th class="max-w-[120px] truncate" title="Кол-во выданных карт">Кол-во выданных карт</th>
         </tr>
@@ -182,7 +191,7 @@
             <!-- <tr class="cursor-pointer transition-color hover:bg-base-200" on:click={() => showModal = true}> -->
             <th>{i + 1}</th>
             <td>{address.address}</td>
-            <td>{['Отделение','Офис'][+is_office]}</td>
+            <td>{['Отделение', 'Офис'][+is_office]}</td>
             <td>{['Вчера', 'Давно'][+connectionDate]}</td>
             <td>{['Нет', 'Да'][+cardMaterialsDelivered]}</td>
             <td>{lastCardIssuanceDays}</td>
@@ -201,7 +210,6 @@
                 <Icon icon="ph:trash" width="15" />
               </button>
             </td>
-            
           </tr>
         {/each}
       </tbody>

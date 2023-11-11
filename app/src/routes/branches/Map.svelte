@@ -4,33 +4,27 @@
   import { onMount } from 'svelte';
   import { Moon } from 'svelte-loading-spinners';
 
-  export let tasks = [];
+  export let branches = [];
   export let center = [45.037165, 38.975636];
-  export let zoom = 10;  
+  export let zoom = 12;
 
-  let map;
   let loaded = false;
-
-  const priorityPresets = {
-    "0": "islands#blueIcon",
-    "1": "islands#yellowIcon",
-    "2": "islands#redIcon",
-  }
-
+  
   function loadMap() {
-    let map = new ymaps.Map('map', {
+    map = new ymaps.Map('map', {
       center: center,
       zoom: zoom
     });
     // Создаем геообъект с типом геометрии "Точка".
-    const points = map.geoObjects;
-    console.log(tasks)
-    tasks.forEach((task) => {
-      points.add(
+
+    branches.forEach((b, i) => {
+      map.geoObjects.add(
         new ymaps.Placemark(
-          [task.branch.latitude, task.branch.longitude],
-          { balloonContentHeader: task.branch.address, balloonContentBody: task.task.name},
-          { preset: priorityPresets[task.priority]}
+          [b.address.latitude, b.address.longitude],
+          {
+            balloonContentHeader: b.address.address,
+          },
+          { preset: b.is_office ? 'islands#greenIcon' : 'islands#blueIcon'}
         )
       );
     });
@@ -40,6 +34,7 @@
   function initYmaps() {
     ymaps.ready(loadMap);
   }
+
 </script>
 
 <svelte:head>
@@ -52,7 +47,7 @@
   {/if}
 </svelte:head>
 
-<div class="w-full h-full max-w-2xl">
+<div class="w-full h-full max-w-5xl">
   {#if !loaded}
     <div class="h-full grid place-content-center">
       <Moon />
