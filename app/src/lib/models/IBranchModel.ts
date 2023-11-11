@@ -1,6 +1,6 @@
 import type { IAddressModel } from './IAddressModel';
 
-enum ConnectionDate {
+export enum ConnectionDate {
   Yesterday,
   LongAgo
 }
@@ -13,4 +13,5 @@ export interface IBranchModel {
   lastCardIssuanceDays: number;
   approvedIssuesNumber: number;
   issuanceCardCount: number;
+  is_office: boolean;
 }

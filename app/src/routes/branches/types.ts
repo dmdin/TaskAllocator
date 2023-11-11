@@ -9,3 +9,6 @@ export interface IBranchRPC {
   delete(id: string): Promise<void>;
   // getBranch(id: number): IBranch
 }
+
+export type Wrapped = { BranchRPC: IBranchRPC; };
+export interface Unwrapped extends IBranchRPC {}
