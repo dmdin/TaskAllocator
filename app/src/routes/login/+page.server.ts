@@ -19,7 +19,7 @@ export const actions: Actions = {
       });
 
       if (err) {
-        console.log(err);
+        console.error(err);
         return fail(400, {
           message: 'Something went wrong.'
         });

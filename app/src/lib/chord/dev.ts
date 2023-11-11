@@ -119,7 +119,6 @@ export class Composer {
     const { method, args } = body;
     const methodDesc = Composer.methods.get(method);
     if (!method) throw new EvalError(`Cannot find method: ${method}`);
-    console.log(method);
     const { target, descriptor } = methodDesc as MethodDescription;
 
     // Inject ctx dependency
@@ -195,15 +194,12 @@ export function initClient<T>(schema: Schema): T {
       modelMethods.map(([k, v]) => {
         const methodName = k.split('/')[1];
         const callable = call(k);
-        console.log(methodName, k);
         // Allow unwrapped calls
         handler[methodName] = callable;
         return [methodName, callable];
       })
     );
-    console.log(renamed);
     handler[model] = renamed;
   }
-  console.log(handler);
   return handler as T;
 }

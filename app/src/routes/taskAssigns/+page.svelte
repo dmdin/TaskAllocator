@@ -29,8 +29,6 @@
 
     loaded = true;
     // points = [];
-
-    console.log('tasks', tasks);
   });
 
   let moveToTask;

@@ -8,22 +8,13 @@
 
   import TaskPriority from '$lib/ui/TaskPriority.svelte';
   import TaskStatus from '$lib/ui/TaskStatus.svelte';
+  import Grade from '$lib/ui/Grade.svelte';
 
   export let data;
-  const { schema } = data;
+  let { schema, tasks, branches, employees } = data;
 
   const rpc = initClient<Wrapped>(schema);
 
-  let tasks = [];
-  let branches = [];
-  let employees = [];
-
-  onMount(async () => {
-    tasks = await rpc.TaskAssignRPC.getForManager(false);
-    branches = await rpc.BranchRPC.getAll({ count: 100, offset: 0 });
-  });
-
-  const grades = ['Jun 🐣', 'Mid 🧑‍💻', ' Sen 🧙‍♂️'];
 
   let editingIndex = 0;
 
@@ -43,7 +34,6 @@
 
   async function saveEdited() {
     let entity, validation;
-    console.log(editing);
     if (editing.id) {
       ({ entity, validation } = await rpc.SpecialistRPC.update(editing));
       employees[editingIndex] = entity;
@@ -105,13 +95,24 @@
       {/each}
     </select>
     <div class=" w-full flex justify-between">
+      <span>Необходимый грейд:</span>
+      <Grade class="font-medium" value={editing.priority} />
+    </div>
+    <div class=" w-full flex justify-between">
       <span>Приоритет:</span>
-      <TaskPriority class="font-medium" value={editing.priority} disabled />
+      <TaskPriority class="font-medium" value={editing.priority} />
     </div>
     <div class=" w-full flex justify-between">
       <span>Статус:</span>
-      <TaskStatus class="font-medium" value={editing.status} disabled />
+      <TaskStatus class="font-medium" value={editing.status}  />
     </div>
+
+    <select placeholder="Сотрудник" class="select select-bordered w-full max-w-xs" bind:value={editing.level}>
+      {#each employees as {firstName,lastName, fatherName, id }, i}
+        <option value={id}>{lastName} {firstName} {fatherName}</option>
+      {/each}
+    </select>
+
     <input
       maxlength="30"
       type="text"
@@ -119,11 +120,7 @@
       class="input input-bordered w-full max-w-xs"
       bind:value={editing.email}
     />
-    <select class="select select-bordered w-full max-w-xs" bind:value={editing.level}>
-      {#each grades as grade, i}
-        <option value={i}>{grade}</option>
-      {/each}
-    </select>
+
   </form>
   <div class="modal-action">
     <form method="dialog">
@@ -148,14 +145,16 @@
           <th />
           <td>Название задачи</td>
           <td>Офис</td>
+          <th>Необходимый грейд</th>
           <td>Приоритет</td>
           <td>Статус</td>
           <td>Дата создания</td>
-          <th>Грейд</th>
+          <td>Сотрудник</td>
         </tr>
       </thead>
       <tbody>
         {#each tasks as task, i}
+          {@const fio = task.specialist ? `${task.specialist?.lastName} ${task.specialist?.firstName} ${task.specialist.fatherName}`:'-'}
           <tr
             class="cursor-pointer transition-color hover:bg-base-200"
             on:click={() => startEditing(i)}
@@ -164,17 +163,13 @@
             <th>{i + 1}</th>
             <td>{task.task.name}</td>
             <td>{task.branch.address}</td>
+            <td><Grade disabled value={task?.level}/></td>
             <td><TaskPriority class="font-medium" value={task.priority} disabled /></td>
             <td><TaskStatus class="font-medium" value={task.status} disabled /></td>
             <td>
               <span class="justify-end">{dayjs(task.created).format('HH:mm DD/MM/YY')}</span>
             </td>
-            <!-- <td>{address}</td>
-            <td>{email}</td>
-            <td>{firstName}</td>
-            <td>{lastName}</td>
-            <td>{fatherName}</td>
-            <td class="font-bold">{grades[level]}</td> -->
+            <td>{fio}</td>
             <td>
               <button class="w-[16px]">
                 <Icon icon="ph:pencil-line" width="15" />

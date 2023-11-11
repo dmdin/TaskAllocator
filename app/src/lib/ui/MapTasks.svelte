@@ -24,7 +24,6 @@
     });
     // Создаем геообъект с типом геометрии "Точка".
 
-    console.log(tasks);
     tasks.forEach((task, i) => {
       map.geoObjects.add(
         new ymaps.Placemark(
@@ -59,8 +58,6 @@
 
   export async function moveToTask(i) {
     const { longitude, latitude } = tasks[i].branch;
-    console.log(longitude, latitude);
-
     await map.setCenter([latitude, longitude], [15]);
   }
 </script>

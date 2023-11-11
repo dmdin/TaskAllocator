@@ -58,7 +58,6 @@ export class TaskAssignRPC implements ITaskAssignRPC {
 
   @rpc()
   async getForManager(onlyActive: boolean): Promise<ITaskAssignFullInfo[]> {
-    console.log(await taskAssignRepo.getForManager(onlyActive))
     return await taskAssignRepo.getForManager(onlyActive);
   }
 

@@ -26,6 +26,17 @@ export class Composer {
     this.config = config;
     // List is unwrapped client and Records<string, Target> are wrapped
     this.models = models;
+    for (const model of models) {
+      this[model.name] = new model()
+      // Reflect.defineProperty(this, model.name, {
+      //   configurable: false,
+      //   enumerable: false,
+      //   get() {
+      //     console.log('init model', new model())
+      //     new model()
+      //   }
+      // });
+    }
     this.middlewares = [];
   }
 

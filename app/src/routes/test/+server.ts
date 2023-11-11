@@ -41,7 +41,7 @@ class TestRPC2 implements ITestRPC2 {
   }
 }
 
-export const composer = new Composer({ TestRPC, TestRPC2 }, { route: '/test' });
+export const composer = new Composer([ TestRPC, TestRPC2 ], { route: '/test' });
 composer.use(sveltekit());
 
 export async function POST(event: RequestEvent) {

@@ -79,7 +79,8 @@ export class TaskAssignRepository extends Repository<ITaskAssign> {
         created: assignTask.date,
         priority: assignTask.priority,
         status: assignTask.status,
-        specialist: specialist
+        specialist: specialist,
+        level: task?.level,
       });
     }
 

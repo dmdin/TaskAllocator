@@ -23,4 +23,5 @@ export interface ITaskAssignFullInfo {
   created: Date | null;
   priority: TaskPriority | null;
   status: TaskAssignStatus | undefined;
+  level: string,
 }

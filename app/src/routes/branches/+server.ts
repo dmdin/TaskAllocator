@@ -35,7 +35,6 @@ export class BranchRPC implements IBranchRPC {
     if (branch.id != null) {
       result = await repo.update(branch.id, branch);
     }
-    console.log(result);
     return result;
   }
 

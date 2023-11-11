@@ -34,7 +34,6 @@
 
   async function saveEdited() {
     let entity, validation;
-    console.log(editing);
     if (editing.id) {
       ({ entity, validation } = await rpc.SpecialistRPC.update(editing));
       employees[editingIndex] = entity;

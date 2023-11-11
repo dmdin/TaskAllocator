@@ -15,4 +15,5 @@ export interface ITaskAssign {
   taskNumber: number | null;
   status: TaskAssignStatus;
   priority: TaskPriority;
+  level: string
 }

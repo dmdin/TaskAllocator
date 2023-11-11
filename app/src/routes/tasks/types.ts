@@ -1,5 +1,7 @@
 import type { IPagingParams } from '$lib/models/IPagingParams';
 import type { ITaskModel } from '$lib/models/ITaskModel';
+import type { IBranchRPC } from '../branches/types';
+import type { ISpecialistRPC } from '../specialists/types';
 import type {ITaskAssignRPC} from '../taskAssigns/types'
 
 export interface ITaskRPC {
@@ -10,4 +12,9 @@ export interface ITaskRPC {
   delete(id: string): Promise<void>;
 }
 
-export type Wrapped = {TaskRPC: ITaskRPC, TaskAssignRPC: ITaskAssignRPC}
+export type Wrapped = {
+  TaskRPC: ITaskRPC, 
+  TaskAssignRPC: ITaskAssignRPC,
+  BranchRPC: IBranchRPC,
+  SpecialistRPC: ISpecialistRPC
+}

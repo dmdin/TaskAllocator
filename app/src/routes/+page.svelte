@@ -8,7 +8,7 @@
   const submitLogout: SubmitFunction = async ({ cancel }) => {
     const { error } = await supabaseClient.auth.signOut();
     if (error) {
-      console.log(error);
+      console.error(error);
     }
     cancel();
   };

@@ -16,7 +16,7 @@ interface Context {
   sb: unknown;
 }
 
-class SpecialistRPC implements ISpecialistRPC {
+export class SpecialistRPC implements ISpecialistRPC {
   @depends()
   private readonly rpc2!: unknown;
 

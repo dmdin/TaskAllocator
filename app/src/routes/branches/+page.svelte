@@ -13,13 +13,7 @@
   const rpc = initClient<Wrapped>(schema);
 
   onMount(async () => {
-    // console.log(await rpc.TestRPC.dbReq(123))
-    // console.log(await rpc.TestRPC2.dbReq3('dbreq3'))
-    //   console.log(await rpc.dbReq(123))
-    //   console.log(await rpc.dbReq2('world'))
-    console.log(rpc);
     branches = await rpc.BranchRPC.getAll({ count: 100, offset: 0 });
-    console.log(branches);
   });
 
   let branches: IBranchModel[] = [];
@@ -46,17 +40,14 @@
     let updated;
     if (editing.id) {
       updated = await rpc.BranchRPC.update(editing);
-      console.log(updated);
       branches[editingIndex] = updated;
     } else {
       updated = await rpc.BranchRPC.create(editing);
-      console.log(updated);
       branches = [updated, ...branches];
     }
   }
 
   function startEditing(index) {
-    console.log('startEditing', branches[index].cardMaterialsDelivered);
     create_modal?.show();
     editingIndex = index;
     editing = branches[index];
@@ -70,7 +61,6 @@
 
   let deleteIndex;
   function deleteEmployee(index) {
-    console.log('deleteEmployee', index);
     delete_modal?.show();
     deleteIndex = index;
   }

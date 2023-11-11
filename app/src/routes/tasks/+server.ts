@@ -10,7 +10,9 @@ import type { IPagingParams } from '$lib/models/IPagingParams';
 import type { ITaskModel } from '$lib/models/ITaskModel';
 import type { IValidationResult } from '$lib/repositories/IValidationResult';
 import sveltekit from '$lib/chord/middlewares/sveltekit';
-import {TaskAssignRPC} from '../taskAssigns/+server'
+import { TaskAssignRPC } from '../taskAssigns/+server'
+import { BranchRPC } from '../branches/+server';
+import { SpecialistRPC  } from '../specialists/+server';
 
 const taskRepo = new Repository<ITaskModel>('tasks', TaskScheme);
 
@@ -58,7 +60,7 @@ class TaskRPC implements ITaskRPC {
   }
 }
 
-export const composer = new Composer([TaskRPC, TaskAssignRPC], { route: '/tasks' });
+export const composer = new Composer([TaskRPC, TaskAssignRPC, BranchRPC, SpecialistRPC], { route: '/tasks' });
 composer.use(sveltekit());
 
 export async function POST(event) {
