@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { invalidateAll } from '$app/navigation';
+  import { goto, invalidateAll } from '$app/navigation';
   import { supabaseClient } from '$lib/supabase';
   import { onMount } from 'svelte';
   import Icon from '@iconify/svelte';
@@ -7,14 +7,18 @@
   import { theme } from '$lib/stores';
 
   import '../app.postcss';
+  export let data;
 
-  onMount(() => {
+  onMount(async () => {
+    // console.log('session', await supabaseClient.auth.getUser())
+
     const {
       data: { subscription }
     } = supabaseClient.auth.onAuthStateChange(() => {
       invalidateAll();
     });
 
+    // console.log('auth', subscription);
     return () => {
       subscription.unsubscribe();
     };
@@ -73,7 +77,17 @@
           <Icon icon="ph:moon-fill" />
         {/if}
       </button>
-      <a href="/login" class="btn btn-sm mr-2"><Icon icon="mingcute:exit-line" />Войти</a>
+      {#if data.session}
+        <button on:click={() => {supabaseClient.auth.signOut(); goto('/')}} class="btn btn-sm mr-2"
+          ><Icon icon="mingcute:exit-line" />
+          Выйти
+        </button>
+      {:else}
+        <button on:click={() => goto('/login')} class="btn btn-sm mr-2"
+          ><Icon icon="mingcute:exit-line" />
+          Войти
+        </button>
+      {/if}
     </div>
   </header>
 

@@ -49,3 +49,7 @@ export const actions: Actions = {
     throw redirect(303, '/');
   }
 };
+
+export async function load({locals}) {
+  if (locals?.session) throw redirect(303, '/tasks')
+}

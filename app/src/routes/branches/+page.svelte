@@ -142,7 +142,7 @@
 </Modal>
 
 <div class="m-auto w-full xl:w-3/4 h-full flex flex-col items-center">
-  <div class="w-full h-[500px] flex justify-center">
+  <div class="w-full md:w-3/4 h-[400px] flex items-center justify-center">
     <Map {branches}/>
   </div>
   <div class="flex w-full justify-between items-center px-3">
