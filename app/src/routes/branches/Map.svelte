@@ -11,6 +11,7 @@
   let loaded = false;
   
   function loadMap() {
+    loaded = true;
     map = new ymaps.Map('map', {
       center: center,
       zoom: zoom
@@ -28,7 +29,6 @@
         )
       );
     });
-    loaded = true;
   }
 
   function initYmaps() {
