@@ -15,12 +15,6 @@
       case 'google':
         await signInWithProvider('google');
         break;
-      case 'discord':
-        await signInWithProvider('discord');
-        break;
-      case 'github':
-        await signInWithProvider('github');
-        break;
       default:
         break;
     }
@@ -47,12 +41,7 @@
     <button formaction="?/login&provider=google" class="btn btn-outline"
       ><Icon icon="flat-color-icons:google" />Google</button
     >
-    <button formaction="?/login&provider=github" class="btn btn-outline"
-      ><Icon icon="devicon:github" />Github</button
-    >
-    <button formaction="?/login&provider=discord" class="btn btn-outline"
-      ><Icon icon="skill-icons:discord" />Discord</button
-    >
+    
   </form>
 </main>
 
