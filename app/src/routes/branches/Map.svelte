@@ -9,7 +9,8 @@
   export let zoom = 12;
 
   let loaded = false;
-  
+  let map;
+
   function loadMap() {
     loaded = true;
     map = new ymaps.Map('map', {
@@ -17,7 +18,6 @@
       zoom: zoom
     });
     // Создаем геообъект с типом геометрии "Точка".
-
     branches.forEach((b, i) => {
       map.geoObjects.add(
         new ymaps.Placemark(
@@ -32,7 +32,13 @@
   }
 
   function initYmaps() {
-    ymaps.ready(loadMap);
+    try {
+      ymaps.ready(loadMap);
+    } catch(e) {
+      console.log(e)
+      loadMap()
+    }
+    
   }
 
 </script>
@@ -47,7 +53,7 @@
   {/if}
 </svelte:head>
 
-<div class="w-full h-full max-w-5xl">
+<div class="w-full h-full max-w-2xl">
   {#if !loaded}
     <div class="h-full grid place-content-center">
       <Moon />
@@ -55,3 +61,4 @@
   {/if}
   <div id="map" class="w-full h-full" />
 </div>
+
