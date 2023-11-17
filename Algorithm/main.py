@@ -313,27 +313,25 @@ app = FastAPI()
 
 
 
-# @ app.get("/force-allocate-tasks")
-# async def force_allocate_tasks():
-#     job()
-#     return "Задачи успешно распределены"
+@ app.get("/force-allocate-tasks")
+async def force_allocate_tasks():
+    job()
+    return "Задачи успешно распределены"
 
 
-# def run_fastapi():
-#     import uvicorn
-#     uvicorn.run(app, host="0.0.0.0", port=8000)
+def run_fastapi():
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
 
 
-# def run_schedule():
-#     schedule.every(1).days.do(job)
-#     while True:
-#         schedule.run_pending()
-#         time.sleep(1)
+def run_schedule():
+    schedule.every(1).days.do(job)
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
 
-# if __name__ == "__main__":
-#     with ThreadPoolExecutor(max_workers=2) as executor:
-#         executor.submit(run_fastapi)
-#         executor.submit(run_schedule)
+if __name__ == "__main__":
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        executor.submit(run_fastapi)
+        executor.submit(run_schedule)
 
-
-job()
