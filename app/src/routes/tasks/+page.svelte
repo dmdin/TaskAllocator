@@ -2,13 +2,14 @@
   import { initClient } from '$lib/chord';
   import Icon from '@iconify/svelte';
   import dayjs from 'dayjs'
-    import { onMount } from 'svelte';
+  import { onMount } from 'svelte';
   import type { Wrapped } from './types';
   import Modal from '$lib/ui/Modal.svelte';
 
   import TaskPriority from '$lib/ui/TaskPriority.svelte';
   import TaskStatus from '$lib/ui/TaskStatus.svelte';
   import Grade from '$lib/ui/Grade.svelte';
+    import { Circle } from 'svelte-loading-spinners';
 
   export let data;
   let { schema, tasks, branches, employees } = data;
@@ -66,6 +67,15 @@
     employees.splice(deleteIndex, 1);
     employees = employees;
   }
+
+  let loading
+  async function rebuild() {
+    loading = true
+    tasks = await rpc.TaskAssignRPC.rebuild()
+    console.log(tasks)
+    loading = false
+  }
+  
 </script>
 
 <Modal id="delete_modal" title="Удаление пользователя">
@@ -132,11 +142,17 @@
 </Modal>
 
 <div class="m-auto w-full xl:w-3/4 h-full flex flex-col items-center">
-  <div class="flex w-full justify-between items-center px-3">
+  <div class="flex w-full justify-between items-center px-3 mb-2">
     <h2 class="font-bold text-2xl">Задачи</h2>
     <!-- <button on:click={startCreating} class="my-2 self-end btn btn-primary !font-bold">
       <Icon icon="ph:user" width="20" /> Создать</button
     > -->
+    <div class="flex items-center gap-2">
+      {#if loading}
+        <Circle size={30}/>
+      {/if}
+    <button on:click={rebuild} class="btn btn-primary">Распределить</button>
+  </div>
   </div>
   <div class="w-full overflow-x-auto">
     <table class="table table-xs md:table-md table-pin-rows table-pin-cols border-1">

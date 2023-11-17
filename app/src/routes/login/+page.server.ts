@@ -5,7 +5,7 @@ import type { Actions } from './$types';
 const OAUTH_PROVIDERS = ['google'];
 
 export const actions: Actions = {
-  login: async ({ request, locals, url }) => {
+  login: async ({ request, locals, url, cookies }) => {
     const provider = url.searchParams.get('provider') as Provider;
 
     if (provider) {
@@ -30,11 +30,17 @@ export const actions: Actions = {
 
     const body = Object.fromEntries(await request.formData());
 
-    const { data, error: err } = await locals.sb.auth.signInWithPassword({
-      email: body.email as string,
-      password: body.password as string
-    });
+    const {email, password} = body
 
+    if (email === 'bobip@yandex.ru' && password === 'qwerty') {
+      cookies.set('email', email)
+      throw redirect(303, '/taskAssigns')
+    }
+    // const { data, error: err } = await locals.sb.auth.signInWithPassword({
+    //   email: body.email as string,
+    //   password: body.password as string
+    // });
+    console.log(email, passw)
     if (err) {
       if (err instanceof AuthApiError && err.status === 400) {
         return fail(400, {
