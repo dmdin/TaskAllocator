@@ -15,6 +15,8 @@ from fastapi import FastAPI
 import time
 import time
 from concurrent.futures import ThreadPoolExecutor
+import requests
+import json
 
 pd.options.mode.chained_assignment = None
 
@@ -73,7 +75,33 @@ def get_sub_workers(point_id, workers_df, time_df, grade, ttime):
     return sub_workers
 
 def get_times(id1, id2, time_df):
-    return time_df[(time_df.id1 == id1) & (time_df.id2 == id2)]["t"].values[0]
+        return time_df[(time_df.id1 == id1) & (time_df.id2 == id2)]["t"].values[0]
+
+def calc_time(lat1, lon1, lat2, lon2):
+    url = 'https://graphhopper.com/api/1/route?key=20fe1199-c4e3-4d78-a92a-fabdf3d74c2c'
+
+    # Тело запроса в формате JSON
+    payload = {
+        "points":[[lat1,lon1],[lat2,lon2]],"profile":"car","locale":"en","calc_points":true,"instructions":false,"points_encoded":false
+    }
+
+    payload_json = json.dumps(payload) # преобразование в JSON
+
+    # Определение заголовков запроса
+    headers = {
+        'Content-Type': 'application/json'
+    }
+
+    # Отправка POST-запроса
+    response = requests.post(url, data=payload_json, headers=headers)
+
+    # Обработка ответа
+    if response.status_code == 200:
+        response_data = response.json()
+        print(response_data)
+    else:
+        print(f'Ошибка {response.status_code} при отправке запроса')
+
 
 def job():
 
