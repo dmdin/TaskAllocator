@@ -8,6 +8,7 @@ export interface ITaskAssignRPC {
   get(id: string): Promise<ITaskAssign>;
   update(id: string): Promise<ITaskAssign>;
   delete(id: string): Promise<void>;
+  rebuild():  Promise<ITaskAssign[]>;
 }
 
 export type Wrapped = { TaskAssignRPC: ITaskAssignRPC; };

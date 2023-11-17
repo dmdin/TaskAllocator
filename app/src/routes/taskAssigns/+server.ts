@@ -12,6 +12,7 @@ import type { IResponse } from '$lib/models/IResponse';
 import type { IUpdateTaskAssignStatusModel } from '$lib/models/IUpdateTaskAssignStatusModel';
 import type { ITaskAssignFullInfo } from '$lib/models/ITaskAssignFullInfo';
 import { SpecialistRPC } from '../specialists/+server';
+import axios from 'axios';
 
 const taskAssignRepo = new TaskAssignRepository('task-assign', TaskAssignScheme);
 export class TaskAssignRPC implements ITaskAssignRPC {
@@ -75,6 +76,13 @@ export class TaskAssignRPC implements ITaskAssignRPC {
   @rpc()
   async delete(id: string): Promise<void> {
     await taskAssignRepo.delete(id);
+  }
+
+  @rpc()
+  async rebuild(): Promise<unknown> {
+    const res = await axios.get("http://misis1.ru:8000/force-allocate-tasks").then(r=> r.data).catch(e => console.error(e));
+    console.log(res)
+    return await this.getForManager(false)
   }
 }
 

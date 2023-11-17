@@ -8,17 +8,19 @@
   import MapTasks from '$lib/ui/MapTasks.svelte';
   export let data;
 
-  let { schema, tasks, employees } = data;
-
+  let { schema, tasks, employees, email } = data;
   const rpc = initClient<Wrapped>(schema);
 
   // TODO remove it after demo
-  
-  const DEFAULT_EMAIL = 'bobip@yandex.ru'
+
+  const DEFAULT_EMAIL = 'bobip@yandex.ru';
   async function updateTasks() {
-    console.log('update tasks', selectedEmail)
-    tasks = await rpc.TaskAssignRPC.getBySpecialistEmail({ email: selectedEmail, onlyActive: false })
-    console.log(tasks)
+    console.log('update tasks', selectedEmail);
+    tasks = await rpc.TaskAssignRPC.getBySpecialistEmail({
+      email: selectedEmail,
+      onlyActive: false
+    });
+    console.log(tasks);
   }
   let selectedEmail = DEFAULT_EMAIL;
 
@@ -29,17 +31,25 @@
   }
 
   let moveToTask;
-
 </script>
 
 <div class="h-full w-full flex flex-col items-center bg-base-100">
   <div class="my-5 flex flex-col items-center">
-    <h2>Выбор исполнителя (только для демонстрации)</h2>
-    <select placeholder="Сотрудник" class="select select-bordered w-full max-w-xs" bind:value={selectedEmail} on:change={updateTasks}>
-      {#each employees as {email, id }, i}
-       <option value={email}>{email}</option>
-      {/each}
-    </select>
+    {#if data.email}
+      <h2>Мои задачи</h2>
+    {:else}
+      <h2>Выбор исполнителя</h2>
+      <select
+        placeholder="Сотрудник"
+        class="select select-bordered w-full max-w-xs"
+        bind:value={selectedEmail}
+        on:change={updateTasks}
+      >
+        {#each employees as { email, id }, i}
+          <option value={email}>{email}</option>
+        {/each}
+      </select>
+    {/if}
   </div>
   <div class="w-full md:w-3/4 h-[400px] flex items-center justify-center">
     {#key tasks}
