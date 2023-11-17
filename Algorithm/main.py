@@ -24,7 +24,7 @@ pd.options.mode.chained_assignment = None
 
 repo = MongoRepository()
 
-repo.getAllTasks()
+    
 
 '''
 Доставка карт и материалов
@@ -75,14 +75,40 @@ def get_sub_workers(point_id, workers_df, time_df, grade, ttime):
     return sub_workers
 
 def get_times(id1, id2, time_df):
-        return time_df[(time_df.id1 == id1) & (time_df.id2 == id2)]["t"].values[0]
+        try:
+            res = time_df[(time_df.id1 == id1) & (time_df.id2 == id2)]["t"].values[0]
+            return res
+        except:
+            branches1 = repo.getAllBranches()
+
+            lat1 = None
+            lon1 = None
+            lat2 = None
+            lon2 = None
+
+            for branch in branches1:
+                print(branch.id)
+                print(id1)
+            
+                if branch.id == id1:
+                    lat1 = branch.address.latitude        
+                    lon1 = branch.address.longitude
+
+                if branch.id == id2:
+                    lat2 = branch.address.latitude        
+                    lon2 = branch.address.longitude
+            return calc_time(lat1, lon1, lat2, lon2)
 
 def calc_time(lat1, lon1, lat2, lon2):
+    print(lat1)
+    print(lon1)
+    print(lat2)
+    print(lon1)
     url = 'https://graphhopper.com/api/1/route?key=20fe1199-c4e3-4d78-a92a-fabdf3d74c2c'
 
     # Тело запроса в формате JSON
     payload = {
-        "points":[[lat1,lon1],[lat2,lon2]],"profile":"car","locale":"en","calc_points":true,"instructions":false,"points_encoded":false
+        "points":[[lat1,lon1],[lat2,lon2]],"profile":"car","locale":"en","calc_points":True,"instructions":False,"points_encoded":False
     }
 
     payload_json = json.dumps(payload) # преобразование в JSON
@@ -99,8 +125,10 @@ def calc_time(lat1, lon1, lat2, lon2):
     if response.status_code == 200:
         response_data = response.json()
         print(response_data)
+        return float(response_data["paths"][0]["time"])/60.0
     else:
         print(f'Ошибка {response.status_code} при отправке запроса')
+        return 10
 
 
 def job():
@@ -303,4 +331,4 @@ if __name__ == "__main__":
         executor.submit(run_fastapi)
         executor.submit(run_schedule)
 
-job()
+
