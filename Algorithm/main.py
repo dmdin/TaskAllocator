@@ -24,6 +24,7 @@ pd.options.mode.chained_assignment = None
 
 repo = MongoRepository()
 
+matr = MatrixWithMinutes()
     
 
 '''
@@ -75,6 +76,9 @@ def get_sub_workers(point_id, workers_df, time_df, grade, ttime):
     return sub_workers
 
 def get_times(id1, id2, time_df):
+        if id1 == id2:
+            return 0
+        
         try:
             res = time_df[(time_df.id1 == id1) & (time_df.id2 == id2)]["t"].values[0]
             return res
@@ -97,13 +101,13 @@ def get_times(id1, id2, time_df):
                 if branch.id == id2:
                     lat2 = branch.address.latitude        
                     lon2 = branch.address.longitude
-            return calc_time(lat1, lon1, lat2, lon2)
+            res =  calc_time(lat1, lon1, lat2, lon2)
+            matr.matrix[id1][id2] = res
+            matr.matrix[id2][id1] = res
+            
+            return res
 
 def calc_time(lat1, lon1, lat2, lon2):
-    print(lat1)
-    print(lon1)
-    print(lat2)
-    print(lon1)
     url = 'https://graphhopper.com/api/1/route?key=20fe1199-c4e3-4d78-a92a-fabdf3d74c2c'
 
     # Тело запроса в формате JSON
@@ -191,7 +195,7 @@ def job():
 
     workers_task = {}
 
-    matr = MatrixWithMinutes()
+
 
     time_df  = []
 
@@ -309,26 +313,27 @@ app = FastAPI()
 
 
 
-@ app.get("/force-allocate-tasks")
-async def force_allocate_tasks():
-    job()
-    return "Задачи успешно распределены"
+# @ app.get("/force-allocate-tasks")
+# async def force_allocate_tasks():
+#     job()
+#     return "Задачи успешно распределены"
 
 
-def run_fastapi():
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+# def run_fastapi():
+#     import uvicorn
+#     uvicorn.run(app, host="0.0.0.0", port=8000)
 
 
-def run_schedule():
-    schedule.every(1).days.do(job)
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
+# def run_schedule():
+#     schedule.every(1).days.do(job)
+#     while True:
+#         schedule.run_pending()
+#         time.sleep(1)
 
-if __name__ == "__main__":
-    with ThreadPoolExecutor(max_workers=2) as executor:
-        executor.submit(run_fastapi)
-        executor.submit(run_schedule)
+# if __name__ == "__main__":
+#     with ThreadPoolExecutor(max_workers=2) as executor:
+#         executor.submit(run_fastapi)
+#         executor.submit(run_schedule)
 
 
+job()
