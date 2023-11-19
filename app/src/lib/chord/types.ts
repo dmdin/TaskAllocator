@@ -1,3 +1,11 @@
+import type {
+  Some,
+  Request,
+  Response,
+  Error,
+  FailedResponse,
+} from './specs'
+
 export interface MethodDescription {
   key: string;
   descriptor: PropertyDescriptor;
@@ -21,13 +29,17 @@ export interface Schema {
   models: string[];
 }
 
-export interface Call {
-  method: string;
-  args: unknown[];
+export type Transport = (data: { route: string, body: unknown }) => Promise<Some<FailedResponse, Response>>
+export type ErrorCallback = (e: Error, req: Request) => Promise<unknown>
+
+export interface ClientConfig {
+  transport: Transport
+  onError: ErrorCallback;
 }
 
 export interface ComposerConfig {
   route?: string;
+  onError?: ErrorCallback;
 }
 
 export interface Target {
