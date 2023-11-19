@@ -71,7 +71,7 @@ export class SpecialistRPC implements ISpecialistRPC {
   }
 }
 
-export const composer = new Composer([SpecialistRPC, BranchRPC], { route: '/specialists' });
+export const composer = new Composer({ SpecialistRPC, BranchRPC }, { route: '/specialists' });
 composer.use(sveltekit());
 
 export async function POST(event: RequestEvent) {

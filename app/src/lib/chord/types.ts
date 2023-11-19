@@ -5,6 +5,7 @@ import type {
   Error,
   FailedResponse,
 } from './specs'
+import type {Composer} from '.'
 
 export interface MethodDescription {
   key: string;
@@ -45,6 +46,12 @@ export interface ComposerConfig {
 export interface Target {
   constructor: { name: string };
 }
+
+export type InjectedModels<T> = {
+  [Property in keyof T]: T[Property]
+}
+
+export type Composed<T> = Composer<T> & InjectedModels<T>
 
 export type PropKey = string | symbol;
 export type ClassConstructor<T extends object> = new (...params: any) => T;

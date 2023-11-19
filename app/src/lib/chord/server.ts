@@ -2,13 +2,14 @@ import 'reflect-metadata';
 
 import type {
   ComposerConfig,
-  ComposerModels,
   MethodDescription,
+  ClassConstructor,
   PropertyDescription,
   Target,
   Schema,
   MethodMetadata,
   PropKey,
+  InjectedModels,
 } from './types';
 
 import {
@@ -25,24 +26,17 @@ import c from 'chalk';
 
 // TODO think to make constructor instead
 export class Composer<T>{
-  config?: ComposerConfig;
-  models: ComposerModels;
-  middlewares: CallableFunction[];
-
-  constructor(models: T[], config?: ComposerConfig) {
+  private config?: ComposerConfig;
+  private models: T;
+  private middlewares: CallableFunction[];
+  
+  constructor(models: T, config?: ComposerConfig) {
     this.config = config;
     // List is unwrapped client and Records<string, Target> are wrapped
     this.models = models;
-    for (const model of models) {
-      this[model.name] = new model()
-      // Reflect.defineProperty(this, model.name, {
-      //   configurable: false,
-      //   enumerable: false,
-      //   get() {
-      //     console.log('init model', new model())
-      //     new model()
-      //   }
-      // });
+    for (const [name, Model] of Object.entries(models)) {
+      // @ts-ignore
+      this[name] = new Model()
     }
     this.middlewares = [];
   }
@@ -77,11 +71,11 @@ export class Composer<T>{
   //
   // }
 
-  use(middleware: CallableFunction) {
+  public use(middleware: CallableFunction) {
     this.middlewares.push(middleware);
   }
 
-  getSchema(route?: string): Schema {
+  public getSchema(route?: string): Schema {
     route = route || (this.config?.route as string);
     if (!route) {
       throw new EvalError('No route provided during Composer initialization or Schema generation');
@@ -97,7 +91,7 @@ export class Composer<T>{
     return { methods, route, models };
   }
 
-  async exec(event: unknown): Promise<Some<FailedResponse, Response>> {
+  public async exec(event: unknown): Promise<Some<FailedResponse, Response>> {
     const ctx = {};
 
     let lastMiddlewareResult;

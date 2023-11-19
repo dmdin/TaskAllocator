@@ -1,8 +1,8 @@
 import { json } from '@sveltejs/kit';
 import type { RequestEvent } from '../$types';
-import { Composer, rpc, depends } from '$lib/chord';
+import { Composer, rpc, depends, type Composed } from '$lib/chord';
 import sveltekit from '$lib/chord/middlewares/sveltekit';
-import type { ITestRPC, ITestRPC2 } from './types';
+import type { ITestRPC, ITestRPC2, Wrapped } from './types';
 
 // THIS IS CONTROLLER
 
@@ -21,7 +21,7 @@ class TestRPC implements ITestRPC {
   dbReq(param: number): string {
     // console.log('!ctx injected ', this.rpc2);
     // console.log('ctx injected ', this.ctx);
-    throw Error('Unknown error occurred')
+    throw Error('Произошла ошибка!')
     return `Hello from TestRPC, ${param}`;
   }
   @rpc()
@@ -43,9 +43,13 @@ class TestRPC2 implements ITestRPC2 {
 }
 
 export const composer = new Composer(
-  [ TestRPC, TestRPC2 ], 
-  { route: '/test', onError: async (e, body) => console.log('hello error', body)}
-);
+  { TestRPC, TestRPC2 },
+  {
+    route: '/test',
+    onError: async (e, body) => console.log('hello error', body)
+  }
+) as unknown as Composed<Wrapped>;
+
 composer.use(sveltekit());
 
 export async function POST(event: RequestEvent) {

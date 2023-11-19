@@ -12,7 +12,7 @@ class GeocoderRPC implements IGeocoderRPC {
   }
 }
 
-const composer = new Composer([GeocoderRPC], { route: '/geocoder' });
+const composer = new Composer({ GeocoderRPC }, { route: '/geocoder' });
 
 export async function POST({ request }) {
   debugger;

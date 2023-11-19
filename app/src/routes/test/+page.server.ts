@@ -1,6 +1,6 @@
 import { composer } from './+server';
 
 export async function load() {
-  // composer
+  console.log(composer.TestRPC.dbReq2('2'))
   return { schema: composer.getSchema() };
 }

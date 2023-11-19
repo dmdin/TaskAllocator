@@ -15,7 +15,7 @@
   }
 
   onMount(async () => {
-    const client = initClient<Wrapped>(schema);
+    const client = initClient<Wrapped>(schema, {onError: catchError});
     console.log('TestRPC2', await client.TestRPC2.dbReq(123));
     console.log('TestRPC', await client.TestRPC.dbReq(123));
   });
