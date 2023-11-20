@@ -31,11 +31,11 @@ export interface Schema {
 }
 
 export type Transport = (data: { route: string, body: unknown }) => Promise<Some<FailedResponse, Response>>
-export type ErrorCallback = (e: Error, req: Request) => Promise<unknown>
+export type ErrorCallback = (e: Error, req: Request) => Promise<unknown> | unknown
 
 export interface ClientConfig {
-  transport: Transport
-  onError: ErrorCallback;
+  transport?: Transport
+  onError?: ErrorCallback;
 }
 
 export interface ComposerConfig {
@@ -49,6 +49,11 @@ export interface Target {
 
 export type InjectedModels<T> = {
   [Property in keyof T]: T[Property]
+}
+
+export type Client<T> = InjectedModels<T> & {
+  batch: (...calls: unknown[]) => Promise<unknown>,
+  b: InjectedModels<T>
 }
 
 export type Composed<T> = Composer<T> & InjectedModels<T>

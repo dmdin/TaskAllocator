@@ -3,9 +3,10 @@ import type {
   ClientConfig,
   Transport,
   ErrorCallback,
+  Client,
 } from './types';
 
-import type { FailedResponse, Response, } from './specs';
+import type { FailedResponse, Response, Request } from './specs';
 import { buildRequest } from './specs';
 
 
@@ -24,7 +25,7 @@ const defaultErrorCallback: ErrorCallback = async (e, { method, params }) => {
 export function initClient<T>(
   schema: Schema,
   config?: ClientConfig
-): T {
+): Client<T> {
   function call(method: string) {
     return async (...params: unknown[]) => {
       const transport = config?.transport ?? defaultTransport
@@ -38,25 +39,44 @@ export function initClient<T>(
     };
   }
 
-  const handler: Record<string, ((params: unknown[]) => Promise<unknown>)> = {};
+  function batchedCall(method: string) {
+    return (...params: unknown[]): Request => {
+      return buildRequest({ method, params })
+    }
+  }
+
+  async function batch(...calls: Request[]) {
+    console.log('batch', calls)
+  }
+
+  const handler = {
+    batch,
+    b: {}
+  };
 
   for (const model of schema.models) {
     const modelMethods = Object.entries(schema.methods).filter(
       ([k, v]) => k.split('.')[0] === model
     );
-    const renamed = Object.fromEntries(
+    const callable = Object.fromEntries(
       // Remove Model name from key and place callable
       modelMethods.map(([k, v]) => {
         const methodName = k.split('.')[1];
         const callable = call(k);
-
         // Allow unwrapped calls
         handler[methodName] = callable;
         return [methodName, callable];
       })
     );
-    handler[model] = renamed;
+
+    const batched = Object.fromEntries(
+      modelMethods.map(
+        ([k, v]) => [k.split('.')[1], batchedCall(k)]
+      )
+    )
+    handler[model] = callable;
+    handler.b[model] = batched
   }
   // console.log(handler)
-  return handler as T;
+  return handler as Client<T>;
 }
