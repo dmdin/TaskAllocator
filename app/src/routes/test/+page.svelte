@@ -16,33 +16,17 @@
 
   onMount(async () => {
     const rpc = initClient<Wrapped>(schema, { onError: catchError });
-
-    // console.log('TestRPC2', await rpc.TestRPC2.dbReq(123));
-    // console.log('TestRPC', await rpc.TestRPC.dbReq(123));
-    // console.log(
-    //   'Batch execution',
-    //   await rpc.batch(
-    //     rpc.b.TestRPC2.dbReq(123),
-    //     rpc.b.TestRPC.dbReq(123)
-    //   )
-    // );
-
-    rpc.batch(
-      rpc.b.TestRPC2.dbReq(123), 
-      rpc.b.TestRPC.dbReq(123)
-    ); // Batch запрос
     
-    rpc.TestRPC2.dbReq(123) // просто запрос
-
-    // ------------- или --------------------
-
-    rpc.batch(
-      rpc.TestRPC2.dbReq(123), 
-      rpc.TestRPC.dbReq(123)
-    ); // Batch запрос
+    console.log(rpc.TestRPC.dbReq.batch(123))
+    console.log('TestRPC2', await rpc.TestRPC2.dbReq(123));
+    console.log('TestRPC', await rpc.TestRPC.dbReq(123));
     
-    rpc.TestRPC2.dbReq(123)() // просто запрос
-
+    const batchRes = await rpc.batch(
+      rpc.TestRPC.dbReq.batch(123),
+      rpc.TestRPC2.dbReq.batch(123), 
+      rpc.TestRPC.dbReq2.batch('123')
+    ); // Batch запрос
+    console.log(batchRes)
     
   });
 </script>

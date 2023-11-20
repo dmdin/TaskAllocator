@@ -5,7 +5,7 @@ async function sveltekitMiddleware(
   ctx: Record<string, unknown>,
   next: CallableFunction
 ) {
-  ctx.request = event?.request;
+  ctx.body = await event.request.json();
   Object.assign(ctx, event.locals);
   next();
 }

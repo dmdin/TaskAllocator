@@ -33,5 +33,7 @@ export interface FailedResponse {
 
 export type Some<T, K> = T | K
 
+
+export type SomeResponse = Some<Response, FailedResponse>
 export type BatchRequest = Request[]
-export type BatchResponse = Response[]
+export type BatchResponse = SomeResponse[]

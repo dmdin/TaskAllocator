@@ -6,7 +6,7 @@ import type {
   Client,
 } from './types';
 
-import type { FailedResponse, Response, Request } from './specs';
+import type { FailedResponse, Response, Request, BatchRequest, BatchResponse } from './specs';
 import { buildRequest } from './specs';
 
 
@@ -22,14 +22,30 @@ const defaultErrorCallback: ErrorCallback = async (e, { method, params }) => {
   throw new EvalError(e.message)
 }
 
+// https://bobbyhadz.com/blog/javascript-check-if-value-is-promise
+function isPromise(p) {
+  if (
+    p !== null &&
+    typeof p === 'object' &&
+    typeof p.then === 'function' &&
+    typeof p.catch === 'function'
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+
 export function initClient<T>(
   schema: Schema,
   config?: ClientConfig
 ): Client<T> {
+  const transport = config?.transport ?? defaultTransport
+  const errorCallback = config?.onError ?? defaultErrorCallback
+
   function call(method: string) {
-    return async (...params: unknown[]) => {
-      const transport = config?.transport ?? defaultTransport
-      const errorCallback = config?.onError ?? defaultErrorCallback
+    return async (params: unknown[]) => {
       const body = buildRequest({ method, params })
       const res = await transport({ route: schema.route, body })
       if ((res as FailedResponse).error) {
@@ -39,44 +55,48 @@ export function initClient<T>(
     };
   }
 
-  function batchedCall(method: string) {
-    return (...params: unknown[]): Request => {
-      return buildRequest({ method, params })
+  async function batch(...calls: BatchRequest) {
+    if (calls.filter((c, i) => isPromise(c)).length) {
+      throw TypeError(
+        'You have passed a Callable method that is Promise, ' +
+        'but Batched Callable is required for "batch" call. \n' +
+        'Try to use rpc.b.<Model>.<method> instead.'
+      )
     }
+    const res = await transport({ route: schema.route, body: calls }) as BatchResponse
+    return res.map((r, i) => {
+      if ((r as FailedResponse)?.error) {
+        errorCallback((r as FailedResponse).error, calls[i])
+      }
+      return (r as Response).result;
+    })
   }
 
-  async function batch(...calls: Request[]) {
-    console.log('batch', calls)
-  }
-
-  const handler = {
+  const handler: Record<string, unknown> = {
     batch,
-    b: {}
   };
 
   for (const model of schema.models) {
     const modelMethods = Object.entries(schema.methods).filter(
       ([k, v]) => k.split('.')[0] === model
     );
-    const callable = Object.fromEntries(
-      // Remove Model name from key and place callable
-      modelMethods.map(([k, v]) => {
-        const methodName = k.split('.')[1];
-        const callable = call(k);
-        // Allow unwrapped calls
-        handler[methodName] = callable;
-        return [methodName, callable];
-      })
-    );
 
-    const batched = Object.fromEntries(
-      modelMethods.map(
-        ([k, v]) => [k.split('.')[1], batchedCall(k)]
-      )
-    )
-    handler[model] = callable;
-    handler.b[model] = batched
+    const instance: Record<string, unknown> = {}
+
+    for (const [method] of modelMethods) {
+      const methodName = method.split('.')[1] as string;
+      const callable = new Proxy(call(method), {
+        apply: function (target, thisArg, args) {
+          return target(args);
+        },
+        get: function () {
+          return (...params: unknown[]) => buildRequest({ method, params })
+        }
+      })
+      instance[methodName] = callable // Isolated by models methods
+      handler[methodName] = callable // Make available top level methods
+    }
+    handler[model] = instance
   }
-  // console.log(handler)
-  return handler as Client<T>;
+  return handler as unknown as Client<T>;
 }

@@ -3,23 +3,22 @@ import 'reflect-metadata';
 import type {
   ComposerConfig,
   MethodDescription,
-  ClassConstructor,
   PropertyDescription,
   Target,
   Schema,
   MethodMetadata,
   PropKey,
-  InjectedModels,
+  Middleware
 } from './types';
 
 import {
   ErrorCode,
   buildResponse,
   buildError,
-  type Response,
   type Request,
-  type FailedResponse,
-  type Some,
+  type SomeResponse,
+  type BatchRequest,
+  type BatchResponse,
 } from './specs';
 
 import c from 'chalk';
@@ -28,8 +27,8 @@ import c from 'chalk';
 export class Composer<T>{
   private config?: ComposerConfig;
   private models: T;
-  private middlewares: CallableFunction[];
-  
+  private middlewares: Middleware[];
+
   constructor(models: T, config?: ComposerConfig) {
     this.config = config;
     // List is unwrapped client and Records<string, Target> are wrapped
@@ -71,7 +70,7 @@ export class Composer<T>{
   //
   // }
 
-  public use(middleware: CallableFunction) {
+  public use(middleware: Middleware) {
     this.middlewares.push(middleware);
   }
 
@@ -91,46 +90,58 @@ export class Composer<T>{
     return { methods, route, models };
   }
 
-  public async exec(event: unknown): Promise<Some<FailedResponse, Response>> {
-    const ctx = {};
+  public async exec(event: unknown): Promise<SomeResponse | BatchResponse> {
+    const ctx: {body?: Request}= {};
 
     let lastMiddlewareResult;
     let middlewareIndex = -1;
     const middlewares = this.middlewares;
 
-    function next() {
+    async function next() {
       middlewareIndex++;
       if (middlewareIndex >= middlewares.length) return;
 
       const middleware = middlewares[middlewareIndex];
-      lastMiddlewareResult = middleware(event, ctx, next);
+      lastMiddlewareResult = await middleware(event, ctx, next);
     }
-    next();
+    await next();
 
     if (middlewareIndex <= middlewares.length - 1) {
       console.warn(c.yellow(`"${middlewares[middlewareIndex].name}" stopped execution`));
       return lastMiddlewareResult;
     }
 
-    // @ts-ignore
-    let request = ctx?.request;
+    let body = ctx?.body;
 
-    if (!request) {
+    if (!body) {
       console.warn(
-        c.yellow('No middleware specified "request" field in context. Trying to find it')
+        c.yellow('No middleware specified "body" field in context. Trying to find it')
       );
-      request = Composer.findRequestField(event);
+      const request = Composer.findRequestField(event);
+
+      if (!request) {
+        return buildError({
+          code: ErrorCode.ParseError,
+          message: 'Body object was not found in provided event',
+          data: []
+        })
+      }
+      body = await request.json()
     }
-    if (!request) {
-      return buildError({
-        code: ErrorCode.ParseError,
-        message: 'Request object was not found in provided event',
-        data: []
-      })
+    if (!Array.isArray(body)) {
+      return this.execProcedure(body, ctx)
     }
 
-    const body: Request = await request.json();
-    if (!body?.method || !body?.params) {
+    const res: BatchResponse = []
+    for (const proc of body) {
+      // We don't want to use Promise All to save the order of execution, isn't it?
+      res.push(await this.execProcedure(proc, ctx))
+    }
+    return res
+  }
+
+  private async execProcedure(proc: Request, ctx: unknown) {
+    if (!proc?.method || !proc?.params) {
       return buildError({
         code: ErrorCode.InvalidRequest,
         message: 'Wrong invocation. Method and Args must be defined',
@@ -138,7 +149,7 @@ export class Composer<T>{
       })
     }
 
-    const { method, params } = body;
+    const { method, params } = proc;
     const methodDesc = Composer.methods.get(method);
     if (!method) {
       return buildError({
@@ -148,7 +159,6 @@ export class Composer<T>{
       })
     }
     // TODO handle Invalid Params error
-
     const { target, descriptor } = methodDesc as MethodDescription;
 
     // Inject ctx dependency
@@ -166,11 +176,11 @@ export class Composer<T>{
     try {
       const result = await descriptor.value.apply(target, params.concat(ctx));
       return buildResponse({
-        request: body,
+        request: proc,
         result
       })
     } catch (e) {
-      await (this.config?.onError ?? console.error)(e, body)
+      await (this.config?.onError ?? console.error)(e, proc)
       return buildError({
         code: ErrorCode.InternalError,
         message: e?.message as string,

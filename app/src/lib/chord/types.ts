@@ -1,9 +1,9 @@
 import type {
-  Some,
   Request,
-  Response,
   Error,
-  FailedResponse,
+  BatchRequest,
+  SomeResponse,
+  BatchResponse,
 } from './specs'
 import type {Composer} from '.'
 
@@ -30,7 +30,7 @@ export interface Schema {
   models: string[];
 }
 
-export type Transport = (data: { route: string, body: unknown }) => Promise<Some<FailedResponse, Response>>
+export type Transport = (data: { route: string, body: unknown }) => Promise<SomeResponse | BatchResponse>
 export type ErrorCallback = (e: Error, req: Request) => Promise<unknown> | unknown
 
 export interface ClientConfig {
@@ -48,15 +48,23 @@ export interface Target {
 }
 
 export type InjectedModels<T> = {
-  [Property in keyof T]: T[Property]
+  [Property in keyof T]: BatchedMethods<T[Property]>
+}
+
+export type BatchedMethods<T> = {
+  [Property in keyof T]: T[Property] & {
+    // @ts-nocheck
+    batch: (...args: Parameters<T[Property]>) => Request
+  }
+
 }
 
 export type Client<T> = InjectedModels<T> & {
-  batch: (...calls: unknown[]) => Promise<unknown>,
-  b: InjectedModels<T>
+  batch: (...calls: BatchRequest) => Promise<unknown[]>,
 }
 
 export type Composed<T> = Composer<T> & InjectedModels<T>
 
 export type PropKey = string | symbol;
-export type ClassConstructor<T extends object> = new (...params: any) => T;
+export type ClassConstructor<T extends object> = new (...params: unknown[]) => T;
+export type Middleware = (event: unknown, ctx: Record<string, unknown>, next: CallableFunction) => Promise<unknown>;
