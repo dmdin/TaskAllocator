@@ -60,7 +60,7 @@ class TaskRPC implements ITaskRPC {
   }
 }
 
-export const composer = new Composer([TaskRPC, TaskAssignRPC, BranchRPC, SpecialistRPC], { route: '/tasks' });
+export const composer = new Composer({ TaskRPC, TaskAssignRPC, BranchRPC, SpecialistRPC }, { route: '/tasks' });
 composer.use(sveltekit());
 
 export async function POST(event) {

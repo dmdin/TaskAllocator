@@ -2,30 +2,42 @@ import 'reflect-metadata';
 
 import type {
   ComposerConfig,
-  ComposerModels,
   MethodDescription,
+  ClassConstructor,
   PropertyDescription,
   Target,
   Schema,
   MethodMetadata,
-  Call,
   PropKey,
-  ClassConstructor
+  InjectedModels,
 } from './types';
 
-import axios from 'axios';
+import {
+  ErrorCode,
+  buildResponse,
+  buildError,
+  type Response,
+  type Request,
+  type FailedResponse,
+  type Some,
+} from './specs';
+
 import c from 'chalk';
 
 // TODO think to make constructor instead
-export class Composer {
-  config?: ComposerConfig;
-  models: ComposerModels;
-  middlewares: CallableFunction[];
-
-  constructor(models: ComposerModels, config?: ComposerConfig) {
+export class Composer<T>{
+  private config?: ComposerConfig;
+  private models: T;
+  private middlewares: CallableFunction[];
+  
+  constructor(models: T, config?: ComposerConfig) {
     this.config = config;
     // List is unwrapped client and Records<string, Target> are wrapped
     this.models = models;
+    for (const [name, Model] of Object.entries(models)) {
+      // @ts-ignore
+      this[name] = new Model()
+    }
     this.middlewares = [];
   }
 
@@ -36,7 +48,7 @@ export class Composer {
   static props = new Map<string, PropertyDescription[]>();
 
   static addMethod({ key, descriptor, metadata, target }: MethodDescription) {
-    key = `${target.constructor.name}/${key}`;
+    key = `${target.constructor.name}.${key}`;
     Composer.methods.set(key, { key, descriptor, metadata, target });
   }
 
@@ -46,7 +58,7 @@ export class Composer {
     Composer.props.set(targetName, oldProps.concat({ key, target }));
   }
 
-  static findRequest(event: unknown) {
+  static findRequestField(event: unknown) {
     if (event?.body && event.method) {
       return event;
     }
@@ -59,11 +71,11 @@ export class Composer {
   //
   // }
 
-  use(middleware: CallableFunction) {
+  public use(middleware: CallableFunction) {
     this.middlewares.push(middleware);
   }
 
-  getSchema(route?: string): Schema {
+  public getSchema(route?: string): Schema {
     route = route || (this.config?.route as string);
     if (!route) {
       throw new EvalError('No route provided during Composer initialization or Schema generation');
@@ -79,7 +91,7 @@ export class Composer {
     return { methods, route, models };
   }
 
-  async exec(event: unknown) {
+  public async exec(event: unknown): Promise<Some<FailedResponse, Response>> {
     const ctx = {};
 
     let lastMiddlewareResult;
@@ -100,25 +112,43 @@ export class Composer {
       return lastMiddlewareResult;
     }
 
+    // @ts-ignore
     let request = ctx?.request;
 
     if (!request) {
       console.warn(
         c.yellow('No middleware specified "request" field in context. Trying to find it')
       );
-      request = Composer.findRequest(event);
+      request = Composer.findRequestField(event);
     }
     if (!request) {
-      throw ReferenceError('Request object was not found in provided event');
+      return buildError({
+        code: ErrorCode.ParseError,
+        message: 'Request object was not found in provided event',
+        data: []
+      })
     }
 
-    const body = await request.json();
-    if (!body?.method || !body?.args)
-      throw TypeError('Wrong invocation. Method and Args must be defined');
+    const body: Request = await request.json();
+    if (!body?.method || !body?.params) {
+      return buildError({
+        code: ErrorCode.InvalidRequest,
+        message: 'Wrong invocation. Method and Args must be defined',
+        data: []
+      })
+    }
 
-    const { method, args } = body;
+    const { method, params } = body;
     const methodDesc = Composer.methods.get(method);
-    if (!method) throw new EvalError(`Cannot find method: ${method}`);
+    if (!method) {
+      return buildError({
+        code: ErrorCode.MethodNotFound,
+        message: `Cannot find method: ${method}`,
+        data: [],
+      })
+    }
+    // TODO handle Invalid Params error
+
     const { target, descriptor } = methodDesc as MethodDescription;
 
     // Inject ctx dependency
@@ -132,7 +162,21 @@ export class Composer {
         }
       });
     }
-    return await descriptor.value.apply(target, args.concat(ctx));
+
+    try {
+      const result = await descriptor.value.apply(target, params.concat(ctx));
+      return buildResponse({
+        request: body,
+        result
+      })
+    } catch (e) {
+      await (this.config?.onError ?? console.error)(e, body)
+      return buildError({
+        code: ErrorCode.InternalError,
+        message: e?.message as string,
+        data: [e]
+      })
+    }
   }
 }
 
@@ -174,32 +218,4 @@ export function depends() {
       }
     });
   };
-}
-
-export function initClient<T>(schema: Schema): T {
-  function call(method: string) {
-    return async (...args: unknown[]) => {
-      return (await axios.post(schema.route, { args, method } as Call)).data;
-    };
-  }
-
-  const handler: Record<string, string | ((args: unknown[]) => Promise<any>)> = {};
-
-  for (const model of schema.models) {
-    const modelMethods = Object.entries(schema.methods).filter(
-      ([k, v]) => k.split('/')[0] === model
-    );
-    const renamed = Object.fromEntries(
-      // Remove Model name from key and place callable
-      modelMethods.map(([k, v]) => {
-        const methodName = k.split('/')[1];
-        const callable = call(k);
-        // Allow unwrapped calls
-        handler[methodName] = callable;
-        return [methodName, callable];
-      })
-    );
-    handler[model] = renamed;
-  }
-  return handler as T;
 }

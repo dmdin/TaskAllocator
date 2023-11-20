@@ -44,7 +44,7 @@ export class BranchRPC implements IBranchRPC {
   }
 }
 
-export const composer = new Composer([BranchRPC], { route: '/branches' });
+export const composer = new Composer({ BranchRPC }, { route: '/branches' });
 composer.use(sveltekit());
 export async function POST(event) {
   debugger;
