@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestEvent } from '../$types';
-import { Composer, rpc, depends, type Composed } from '$lib/chord';
+import { Composer, rpc, depends, type Composed, buildResponse } from '$lib/chord';
 import sveltekit from '$lib/chord/middlewares/sveltekit';
 import type { ITestRPC, ITestRPC2, Wrapped } from './types';
 
@@ -11,9 +11,6 @@ interface Context {
 }
 
 class TestRPC implements ITestRPC {
-  @depends()
-  private readonly rpc2!: unknown;
-
   @depends()
   private readonly ctx!: Context;
 
@@ -30,8 +27,17 @@ class TestRPC implements ITestRPC {
   }
 }
 
+
+function testMode() {
+  return async function h(event, ctx, next) {
+    console.log(event.raw)
+    return buildResponse({request: event.raw, result: 'hello!!!!'})
+  }
+}
+
 class TestRPC2 implements ITestRPC2 {
-  @rpc()
+
+  @rpc({ use: [testMode()]})
   dbReq(param: number): string {
     return `Hello from TestRPC2, ${param}!`;
   }

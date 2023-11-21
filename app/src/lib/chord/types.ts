@@ -8,10 +8,15 @@ import type {
 import type {Composer} from '.'
 
 export interface MethodDescription {
-  key: string;
+  key: PropKey;
   descriptor: PropertyDescriptor;
   target: Target;
   metadata: MethodMetadata;
+  use: Middleware[];
+}
+
+export interface MethodConfig {
+  use?: Middleware[]
 }
 
 export interface PropertyDescription {

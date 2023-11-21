@@ -17,9 +17,9 @@
   onMount(async () => {
     const rpc = initClient<Wrapped>(schema, { onError: catchError });
     
-    console.log(rpc.TestRPC.dbReq.batch(123))
+    // console.log(rpc.TestRPC.dbReq.batch(123))
     console.log('TestRPC2', await rpc.TestRPC2.dbReq(123));
-    console.log('TestRPC', await rpc.TestRPC.dbReq(123));
+    // console.log('TestRPC', await rpc.TestRPC.dbReq(123));
     
     const batchRes = await rpc.batch(
       rpc.TestRPC.dbReq.batch(123),

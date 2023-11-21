@@ -8,7 +8,8 @@ import type {
   Schema,
   MethodMetadata,
   PropKey,
-  Middleware
+  Middleware,
+  MethodConfig
 } from './types';
 
 import {
@@ -17,7 +18,6 @@ import {
   buildError,
   type Request,
   type SomeResponse,
-  type BatchRequest,
   type BatchResponse,
 } from './specs';
 
@@ -46,9 +46,9 @@ export class Composer<T>{
   // We need to use name of class as key to optimize dependency search in case of large amount of DI
   static props = new Map<string, PropertyDescription[]>();
 
-  static addMethod({ key, descriptor, metadata, target }: MethodDescription) {
-    key = `${target.constructor.name}.${key}`;
-    Composer.methods.set(key, { key, descriptor, metadata, target });
+  static addMethod({ key, descriptor, metadata, target, use }: MethodDescription) {
+    key = `${target.constructor.name}.${String(key)}`;
+    Composer.methods.set(key, { key, descriptor, metadata, target, use });
   }
 
   static addProp({ key, target }) {
@@ -91,25 +91,8 @@ export class Composer<T>{
   }
 
   public async exec(event: unknown): Promise<SomeResponse | BatchResponse> {
-    const ctx: {body?: Request}= {};
-
-    let lastMiddlewareResult;
-    let middlewareIndex = -1;
-    const middlewares = this.middlewares;
-
-    async function next() {
-      middlewareIndex++;
-      if (middlewareIndex >= middlewares.length) return;
-
-      const middleware = middlewares[middlewareIndex];
-      lastMiddlewareResult = await middleware(event, ctx, next);
-    }
-    await next();
-
-    if (middlewareIndex <= middlewares.length - 1) {
-      console.warn(c.yellow(`"${middlewares[middlewareIndex].name}" stopped execution`));
-      return lastMiddlewareResult;
-    }
+    const { ctx, res } = await this.runMiddlewares(this.middlewares, event);
+    if (res) return res as SomeResponse
 
     let body = ctx?.body;
 
@@ -132,12 +115,36 @@ export class Composer<T>{
       return this.execProcedure(body, ctx)
     }
 
-    const res: BatchResponse = []
+    const batch: BatchResponse = []
     for (const proc of body) {
       // We don't want to use Promise All to save the order of execution, isn't it?
-      res.push(await this.execProcedure(proc, ctx))
+      batch.push(await this.execProcedure(proc, ctx))
     }
-    return res
+    return batch
+  }
+
+
+  private async runMiddlewares(middlewares: Middleware[], event: unknown): Promise<{ ctx: unknown, res: unknown }> {
+    const ctx = event?.ctx ?? {};
+
+    let lastMiddlewareResult;
+    let middlewareIndex = -1;
+
+    async function next() {
+      middlewareIndex++;
+      if (middlewareIndex >= middlewares.length) return;
+
+      const middleware = middlewares[middlewareIndex];
+      lastMiddlewareResult = await middleware(event, ctx, next);
+    }
+    await next();
+
+    if (middlewareIndex <= middlewares.length - 1) {
+      console.debug(c.yellow(`"${middlewares[middlewareIndex].name}" stopped execution`));
+      return { ctx, res: lastMiddlewareResult };
+    }
+
+    return { ctx, res: undefined }
   }
 
   private async execProcedure(proc: Request, ctx: unknown) {
@@ -158,22 +165,27 @@ export class Composer<T>{
         data: [],
       })
     }
-    // TODO handle Invalid Params error
-    const { target, descriptor } = methodDesc as MethodDescription;
 
-    // Inject ctx dependency
-    const ctxProp = Composer.props.get(target.constructor.name)?.find((d) => d.key === 'ctx');
-    if (ctxProp) {
-      Reflect.defineProperty(target, ctxProp.key, {
-        configurable: false,
-        enumerable: false,
-        get() {
-          return ctx;
-        }
-      });
-    }
+    // TODO handle Invalid Params error
+    const { target, descriptor, use } = methodDesc as MethodDescription;
 
     try {
+      let res;
+      ({ ctx, res } = await this.runMiddlewares(use, {ctx, raw: proc, call: {method, params}}));
+      if (res) return res as SomeResponse
+
+      // Inject ctx dependency
+      const ctxProp = Composer.props.get(target.constructor.name)?.find((d) => d.key === 'ctx');
+      if (ctxProp) {
+        Reflect.defineProperty(target, ctxProp.key, {
+          configurable: false,
+          enumerable: false,
+          get() {
+            return ctx;
+          }
+        });
+      }
+
       const result = await descriptor.value.apply(target, params.concat(ctx));
       return buildResponse({
         request: proc,
@@ -190,7 +202,7 @@ export class Composer<T>{
   }
 }
 
-export function rpc() {
+export function rpc(config?: MethodConfig) {
   return function (target: Target, key: PropKey, descriptor: PropertyDescriptor) {
     // console.log(key, key, descriptor)
     // console.log('Metadata', Reflect.getMetadataKeys(target))
@@ -202,10 +214,12 @@ export function rpc() {
     // console.log("design:returntype", Reflect.getMetadata('design:returntype', target, key)?.name);
     const metadata = {
       key,
-      argsType: Reflect.getMetadata('design:paramtypes', target, key)?.map((a) => a?.name),
-      returnType: Reflect.getMetadata('design:returntype', target, key)
+      argsType: Reflect.getMetadata('design:paramtypes', target as object, key)?.map((a) => a?.name),
+      returnType: Reflect.getMetadata('design:returntype', target as object, key)
     };
-    Composer.addMethod({ key, descriptor, metadata, target });
+
+    const use = config?.use ?? []
+    Composer.addMethod({ key, descriptor, metadata, target, use });
   };
 }
 
@@ -220,12 +234,16 @@ export function depends() {
     // If dependency is context, inject it during exec call
     if (key === 'ctx') return;
 
-    Reflect.defineProperty(target, key, {
-      configurable: false,
-      enumerable: false,
-      get() {
-        return 'hello world';
-      }
-    });
+    throw TypeError(
+      "Dependency injection is supported only for 'ctx' property right now.\n" +
+      `Remove ${key} property inside ${target.constructor.name}`
+    )
+    // Reflect.defineProperty(target, key, {
+    //   configurable: false,
+    //   enumerable: false,
+    //   get() {
+    //     return 'hello world';
+    //   }
+    // });
   };
 }
