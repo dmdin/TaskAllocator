@@ -18,9 +18,6 @@ interface Context {
 
 export class SpecialistRPC implements ISpecialistRPC {
   @depends()
-  private readonly rpc2!: unknown;
-
-  @depends()
   private readonly ctx!: Context;
 
   @rpc()
